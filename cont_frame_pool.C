@@ -127,6 +127,30 @@
 /* METHODS FOR CLASS   C o n t F r a m e P o o l */
 /*--------------------------------------------------------------------------*/
 
+ContFramePool::FrameState ContFramePool::get_state(unsigned long _frame_no) {
+	unsigned bitmap_index = _frame_no / 8;
+	unsigned char mask = 0x1 << (_frame_no % 8);
+
+	unsigned char c = bitmap[bitmap_index];
+
+	switch(c) {
+		case '0':
+			return FrameState::Free;
+			break;
+		case '1':
+			return FrameState::Used;
+			break;
+		case '2':
+			return FrameState::HoS;
+			break;
+		default:
+			return 3;
+	}
+
+
+}
+
+
 // TODO: eventually, use BIT MANIPULATION
 void ContFramePool::set_state(unsigned long _frame_no, FrameState _state) {
 	unsigned int bitmap_index = _frame_no / 8;
@@ -140,11 +164,14 @@ void ContFramePool::set_state(unsigned long _frame_no, FrameState _state) {
 			bitmap[bitmap_index] = '1';
 			break;
 		case FrameState::HoS:
-			bitmap[bitmap_index] = '3';
+			bitmap[bitmap_index] = '2';
 			break;
 	}
 	
 }
+
+
+
 
  // Constructor: Initialize all frames to FREE, except for any frames that you 
  // need for the management of the frame pool, if any.
