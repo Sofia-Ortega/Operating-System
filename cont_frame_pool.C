@@ -143,8 +143,6 @@ ContFramePool::FrameState ContFramePool::get_state(unsigned long _frame_no) {
 		case '2':
 			return FrameState::HoS;
 			break;
-		default:
-			return 3;
 	}
 
 
@@ -217,12 +215,52 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
 
 
 
+ // get_frames(_n_frames): Traverse the "bitmap" of states and look for a 
+ // sequence of at least _n_frames entries that are FREE. If you find one, 
+ // mark the first one as HEAD-OF-SEQUENCE and the remaining _n_frames-1 as
+ // ALLOCATED.
 unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 {
     // TODO: IMPLEMENTATION NEEEDED!
-    Console::puts("ContframePool::get_frames not implemented!\n");
-    assert(false);
-    return 0;
+   
+	// any frames left to allocate?
+	assert(nFreeFrames >= _n_frames);
+
+
+	
+	// find first frame_no of sequence of free frames
+	// mark frame seq as used in bitmap 
+	unsigned int  frame_no = 0;
+	unsigned counter = 0;
+
+	while(counter < _n_frames) {
+		if(get_state(frame_no) == FrameState::Free) {
+			counter++;
+		} else {
+			counter = 0;
+		}
+
+		frame_no++;
+	}
+
+	frame_no -= _n_frames; // get first frame_no of sequence
+
+	// mark first frame in seq as HoS
+	set_state(frame_no, FrameState::HoS);
+
+	// mark all frames in range as used
+	for(unsigned int i = frame_no + 1; i < frame_no + _n_frames - 1; i++) {
+		set_state(i, FrameState::Used);
+	}
+
+	nFreeFrames -= _n_frames;
+
+	return frame_no + base_frame_no;
+	
+	// don't have to check if overrun. Handled by assert above
+	Console::puts("ContframePool::get_frames working ?? :D\n");
+	
+    return frame_no + base_frame_no;
 }
 
 void ContFramePool::mark_inaccessible(unsigned long _base_frame_no,
