@@ -127,20 +127,75 @@
 /* METHODS FOR CLASS   C o n t F r a m e P o o l */
 /*--------------------------------------------------------------------------*/
 
+// TODO: eventually, use BIT MANIPULATION
+void ContFramePool::set_state(unsigned long _frame_no, FrameState _state) {
+	unsigned int bitmap_index = _frame_no / 8;
+	unsigned char mask = 0x1 << (_frame_no % 8);
+
+	switch(_state) {
+		case FrameState::Free:
+			bitmap[bitmap_index] = '0';
+			break;
+		case FrameState::Used:
+			bitmap[bitmap_index] = '1';
+			break;
+		case FrameState::HoS:
+			bitmap[bitmap_index] = '3';
+			break;
+	}
+	
+}
+
+ // Constructor: Initialize all frames to FREE, except for any frames that you 
+ // need for the management of the frame pool, if any.
 ContFramePool::ContFramePool(unsigned long _base_frame_no,
                              unsigned long _n_frames,
                              unsigned long _info_frame_no)
 {
     // TODO: IMPLEMENTATION NEEEDED!
-    Console::puts("ContframePool::Constructor not implemented!\n");
-    assert(false);
+	Console::puts("Frame Pool (theoretically) initialized\n");
+	
+	// HOW do i know how much i need to manage frames??
+
+	// Bitmpa must fit into single frame
+	assert(_n_frames <= FRAME_SIZE * 8);
+
+	base_frame_no = _base_frame_no;
+	nframes = _n_frames;
+	info_frame_no = _info_frame_no;
+
+	// if _info_frame_no is zero, then we keep management info in the first
+	// frame, else we use the provided frame to keep managment info
+	if(info_frame_no == 0) {
+		bitmap = (unsigned char *) (base_frame_no * FRAME_SIZE);
+	} else {
+		bitmap = (unsigned char *) (info_frame_no * FRAME_SIZE);
+	}
+
+
+	// Everything fine-and-dandy. Proceed to mark all frames as free
+	for(int fno = 0; fno < nframes; fno++) {
+		set_state(fno, FrameState::Free); // TODO: set_state !!!!
+	}
+
+	// mark first frame as used, if it is being used 
+	if(info_frame_no == 0) {
+		set_state(0, FrameState::Used);	
+		nFreeFrames--;
+	}
+
+
+
 }
+
+
 
 unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 {
     // TODO: IMPLEMENTATION NEEEDED!
     Console::puts("ContframePool::get_frames not implemented!\n");
     assert(false);
+    return 0;
 }
 
 void ContFramePool::mark_inaccessible(unsigned long _base_frame_no,
@@ -163,4 +218,5 @@ unsigned long ContFramePool::needed_info_frames(unsigned long _n_frames)
     // TODO: IMPLEMENTATION NEEEDED!
     Console::puts("ContframePool::need_info_frames not implemented!\n");
     assert(false);
+    return 0;
 }
