@@ -263,19 +263,35 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
     return frame_no + base_frame_no;
 }
 
+
+/*
+   mark_inaccessible(_base_frame_no, _n_frames): This is no different than
+   get_frames, without having to search for the free sequence. You tell the
+   allocator exactly which frame to mark as HEAD-OF-SEQUENCE and how many
+   frames after that to mark as ALLOCATED.
+*/
 void ContFramePool::mark_inaccessible(unsigned long _base_frame_no,
                                       unsigned long _n_frames)
 {
     // TODO: IMPLEMENTATION NEEEDED!
-    Console::puts("ContframePool::mark_inaccessible not implemented!\n");
-    assert(false);
+	
+	// mark first frame in seq as HoS
+	set_state(_base_frame_no, FrameState::HoS);
+
+	for (int fno = _base_frame_no + 1; fno < _base_frame_no + _n_frames - 1; fno++) {
+		set_state(fno - _base_frame_no, FrameState::Used); // what is this minus buisness??
+	}
+	
+    Console::puts("ContframePool::mark_inaccessible MIGHT work\n");
 }
 
 void ContFramePool::release_frames(unsigned long _first_frame_no)
 {
     // TODO: IMPLEMENTATION NEEEDED!
+	
+
+	
     Console::puts("ContframePool::release_frames not implemented!\n");
-    assert(false);
 }
 
 unsigned long ContFramePool::needed_info_frames(unsigned long _n_frames)
