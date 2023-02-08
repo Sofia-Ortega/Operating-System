@@ -170,6 +170,7 @@ void ContFramePool::set_state(unsigned long _frame_no, FrameState _state) {
 
 
 
+ContFramePool* ContFramePool::head = nullptr;
 
  // Constructor: Initialize all frames to FREE, except for any frames that you 
  // need for the management of the frame pool, if any.
@@ -179,6 +180,18 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
 {
     // TODO: IMPLEMENTATION NEEEDED!
 	Console::puts("Frame Pool (theoretically) initialized\n");
+
+	// adding to linked list
+	if(head == nullptr) {
+		head = this;
+		next = nullptr;
+		prev = nullptr;
+	} else {
+		next = head;
+		prev = nullptr;
+		head->prev = this;
+		head = this;
+	}
 	
 	// HOW do i know how much i need to manage frames??
 
@@ -200,7 +213,7 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
 
 	// Everything fine-and-dandy. Proceed to mark all frames as free
 	for(int fno = 0; fno < nframes; fno++) {
-		set_state(fno, FrameState::Free); // TODO: set_state !!!!
+		set_state(fno, FrameState::Free); 
 	}
 
 	// mark first frame as used, if it is being used 
@@ -231,7 +244,7 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 	// find first frame_no of sequence of free frames
 	// mark frame seq as used in bitmap 
 	unsigned int  frame_no = 0;
-	unsigned counter = 0;
+	unsigned int counter = 0;
 
 	while(counter < _n_frames) {
 		if(get_state(frame_no) == FrameState::Free) {
@@ -255,8 +268,6 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 
 	nFreeFrames -= _n_frames;
 
-	return frame_no + base_frame_no;
-	
 	// don't have to check if overrun. Handled by assert above
 	Console::puts("ContframePool::get_frames working ?? :D\n");
 	
@@ -285,13 +296,49 @@ void ContFramePool::mark_inaccessible(unsigned long _base_frame_no,
     Console::puts("ContframePool::mark_inaccessible MIGHT work\n");
 }
 
+/*
+ release_frames(_first_frame_no): Check whether the first frame is marked as
+ HEAD-OF-SEQUENCE. If not, something went wrong. If it is, mark it as FREE.
+ Traverse the subsequent frames until you reach one that is FREE or 
+ HEAD-OF-SEQUENCE. Until then, mark the frames that you traverse as FREE.
+
+ A WORD ABOUT RELEASE_FRAMES():
+ 
+ When we releae a frame, we only know its frame number. At the time
+ of a frame's release, we don't know necessarily which pool it came
+ from. Therefore, the function "release_frame" is static, i.e., 
+ not associated with a particular frame pool.
+ 
+*/
+
 void ContFramePool::release_frames(unsigned long _first_frame_no)
 {
     // TODO: IMPLEMENTATION NEEEDED!
 	
 
+	// find correct frame pool
+	ContFramePool* pool;
+
+
+
+
+	// call pool's personal release_frame 
+	// pool->_release_frames
 	
-    Console::puts("ContframePool::release_frames not implemented!\n");
+	// check if first frame marked as HoS
+	/*
+	assert(get_state(_first_frame_no) == FrameState::Used);
+	
+	unsigned long fno = _first_frame_no;
+	while (get_state(fno) == FrameState::Used) {
+		set_state(fno, FrameState::Free);
+		fno++;
+		nFreeFrames++;
+	}	
+	*/
+
+    Console::puts("ContframePool::release_frames very wrong :(\n");
+	assert(false)
 }
 
 unsigned long ContFramePool::needed_info_frames(unsigned long _n_frames)
