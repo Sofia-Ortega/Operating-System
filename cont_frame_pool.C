@@ -317,9 +317,30 @@ void ContFramePool::release_frames(unsigned long _first_frame_no)
 	
 
 	// find correct frame pool
-	ContFramePool* pool;
+	ContFramePool* pool = head;
+	unsigned long frameNum = 0;
+
+	while (pool != nullptr) {
+		frameNum = _first_frame_no + pool->base_frame_no;
+		if (_first_frame_no >= pool->base_frame_no && _first_frame_no < pool->base_frame_no + pool->nframes) break;
+		// if( pool->get_state( frameNum ) == FrameState::HoS) break;	
+		pool = pool->next;
+	}
 
 
+	// error checking: pool not found
+	if (pool == nullptr) {
+		Console::puts("ContframePool::Release_frames: pool not found");
+		return;
+		// assert(false);
+	}
+
+	// release frames from pool
+	frameNum = _first_frame_no;
+	while (pool->get_state(frameNum) != FrameState::Free) {
+		pool->set_state(frameNum, FrameState::Free); 
+		frameNum++;
+	}
 
 
 	// call pool's personal release_frame 
@@ -337,14 +358,10 @@ void ContFramePool::release_frames(unsigned long _first_frame_no)
 	}	
 	*/
 
-    Console::puts("ContframePool::release_frames very wrong :(\n");
-	assert(false)
 }
 
 unsigned long ContFramePool::needed_info_frames(unsigned long _n_frames)
 {
-    // TODO: IMPLEMENTATION NEEEDED!
-    Console::puts("ContframePool::need_info_frames not implemented!\n");
-    assert(false);
-    return 0;
+	int round = _n_frames / FRAME_SIZE == 0 ? 0 : 1;
+    return (_n_frames / FRAME_SIZE) + round;
 }
