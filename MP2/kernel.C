@@ -84,6 +84,7 @@ int main() {
                                    process_mem_pool_info_frame);
     
     process_mem_pool.mark_inaccessible(MEM_HOLE_START_FRAME, MEM_HOLE_SIZE);
+
 */
     /* -- MOST OF WHAT WE NEED IS SETUP. THE KERNEL CAN START. */
 
@@ -91,9 +92,21 @@ int main() {
 
     /* -- TEST MEMORY ALLOCATOR */
     
-    test_memory(&kernel_mem_pool, 32);
+     // test_memory(&kernel_mem_pool, 32);
+     // test_memory(&kernel_mem_pool, 123);
+
+     // test_memory(&kernel_mem_pool, 150);
+
+     // test_memory(&kernel_mem_pool, 175);
+
+    test_memory(&kernel_mem_pool, 200);
+    // test_memory(&kernel_mem_pool, 200);
 
     /* ---- Add code here to test the frame pool implementation. */
+
+	// ContFramePool process_pool(PROCESS_POOL_START_FRAME, PROCESS, 0)	
+
+	
     
     /* -- NOW LOOP FOREVER */
     Console::puts("Testing is DONE. We will do nothing forever\n");

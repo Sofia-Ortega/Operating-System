@@ -1,8 +1,11 @@
 #include "simple_frame_pool.H"
+#include <iostream>
+using namespace std;
+/*
 #include "console.H"
 #include "utils.H"
 #include "assert.H"
-
+*/
 SimpleFramePool::FrameState SimpleFramePool::get_state(unsigned long _frame_no) {
     unsigned int bitmap_index = _frame_no / 8;
     unsigned char mask = 0x1 << (_frame_no % 8);
@@ -31,7 +34,7 @@ SimpleFramePool::SimpleFramePool(unsigned long _base_frame_no,
                                  unsigned long _info_frame_no)
 {
     // Bitmap must fit in a single frame!
-    assert(_nframes <= FRAME_SIZE * 8);
+    // assert(_nframes <= FRAME_SIZE * 8);
     
     base_frame_no = _base_frame_no;
     nframes = _nframes;
@@ -57,14 +60,18 @@ SimpleFramePool::SimpleFramePool(unsigned long _base_frame_no,
         nFreeFrames--;
     }
     
-    Console::puts("Frame Pool initialized\n");
+    // Console::puts("Frame Pool initialized\n");
 }
 
 unsigned long SimpleFramePool::get_frame()
 {
     
     // Any frames left to allocate?
-    assert(nFreeFrames > 0);
+    // assert(nFreeFrames > 0);
+	if (nFreeFrames > 0) {
+		cout << "not enuf frames" << endl;
+		return 0;
+	}
     
     // Find a frame that is not being used and return its frame index.
     // Mark that frame as being used in the bitmap.
@@ -87,7 +94,7 @@ void SimpleFramePool::mark_inaccessible(unsigned long _base_frame_no,
 {
     // Mark all frames in the range as being used.
     for(int fno = _base_frame_no; fno < _base_frame_no + _nframes; fno++){
-        set_state(fno - this->base_frame_no, FrameState::Used);
+        set_state(fno - _base_frame_no, FrameState::Used);
     }
 }
 
@@ -107,7 +114,7 @@ void SimpleFramePool::release_frame(unsigned long _frame_no)
     // as released as follows:
     
     // The frame better be used before we release it.
-    assert(get_state(_frame_no - base_frame_no) == FrameState::Used);
+    // assert(get_state(_frame_no - base_frame_no) == FrameState::Used);
     
     set_state(_frame_no - base_frame_no, FrameState::Free);
     
