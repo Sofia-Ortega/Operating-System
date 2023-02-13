@@ -128,22 +128,57 @@
 /*--------------------------------------------------------------------------*/
 
 ContFramePool::FrameState ContFramePool::get_state(unsigned long _frame_no) {
-	unsigned bitmap_index = _frame_no / 8;
-	unsigned char mask = 0x1 << (_frame_no % 8);
+	unsigned bitmap_index = _frame_no / 4;
+	int pickBit = _frame_no % 4;
+
+	// if pickBit == 0;   00 00 00 11 
+	// elif pickBit == 1; 00 00 11 00 
+	// elif pickBit == 2; 00 11 00 00
+	// elif pickBit == 3; 11 00 00 00 
+	
+	pickBit *= 2;
+	unsigned char mask = 0x11 << pickBit;
+
+	
 
 	unsigned char c = bitmap[bitmap_index];
 
+	// Free: 00
+	// Used: 01
+	// HoS:  11 
+	
+	unsigned char bitPair = c & mask; // 11 00 00 00
+	bitPair = bitPair >> pickBit; // 00 00 00 11   
+
+	if (bitPair == 0x00) {
+		return FrameState::Free;
+	} else if (bitPair == 0x01) {
+		return FrameState::Used;
+	} else if(bitPair == 0x11) {
+		return FrameState::HoS;
+	} else if (bitPair == 0x01) {
+		Console::puts("get_state: bitPair result: 2 WRONG \n ");
+		assert(false);
+	} else {
+		Console::puts ("get_state: something went TERRIBLY wrong \n");
+		assert(false);
+	}
+
+	/*
 	switch(c) {
-		case '0':
+		case (c & mask) == 0:
 			return FrameState::Free;
 			break;
-		case '1':
+			
+		case intBitPair == 1:
 			return FrameState::Used;
 			break;
-		case '2':
+		case intBitPair == 3:
 			return FrameState::HoS;
 			break;
+		
 	}
+	*/
 
 
 }
@@ -151,18 +186,36 @@ ContFramePool::FrameState ContFramePool::get_state(unsigned long _frame_no) {
 
 // TODO: eventually, use BIT MANIPULATION
 void ContFramePool::set_state(unsigned long _frame_no, FrameState _state) {
-	unsigned int bitmap_index = _frame_no / 8;
-	unsigned char mask = 0x1 << (_frame_no % 8);
+	unsigned bitmap_index = _frame_no / 4;
+	int pickBit = _frame_no % 4;
+
+	// if pickBit == 0;   00 00 00 11 
+	// elif pickBit == 1; 00 00 11 00 
+	// elif pickBit == 2; 00 11 00 00
+	// elif pickBit == 3; 11 00 00 00 
+	
+	pickBit *= 2;
+	unsigned char mask = 0x11 << pickBit;
+	
+
+	// Free: 00
+	// Used: 01
+	// HoS:  11 
 
 	switch(_state) {
 		case FrameState::Free:
-			bitmap[bitmap_index] = '0';
+			// 11 & 00 = 00
+			bitmap[bitmap_index] &= ~mask;
 			break;
 		case FrameState::Used:
-			bitmap[bitmap_index] = '1';
+			// convert bit pair to 00
+			bitmap[bitmap_index] &= ~mask;
+			
+			mask = 0x01 << pickBit;
+			bitmap[bitmap_index] |= mask;
 			break;
 		case FrameState::HoS:
-			bitmap[bitmap_index] = '2';
+			bitmap[bitmap_index] |= mask;
 			break;
 	}
 	
@@ -196,7 +249,7 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
 	// HOW do i know how much i need to manage frames??
 
 	// Bitmpa must fit into single frame
-	assert(_n_frames <= FRAME_SIZE * 8);
+	// assert(_n_frames <= FRAME_SIZE * 8);
 
 	base_frame_no = _base_frame_no;
 	nframes = _n_frames;
@@ -209,16 +262,22 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
 	} else {
 		bitmap = (unsigned char *) (info_frame_no * FRAME_SIZE);
 	}
-
+	
+	
+	unsigned long neededFrames = needed_info_frames(_n_frames);
+	base_frame_no += neededFrames; 
+	nFreeFrames -= neededFrames;
 
 	// Everything fine-and-dandy. Proceed to mark all frames as free
-	for(int fno = 0; fno < nframes; fno++) {
+	for(int fno = base_frame_no; fno < base_frame_no + nframes; fno++) {
+		Console::puts ( "set_state here");
 		set_state(fno, FrameState::Free); 
 	}
 
+
 	// mark first frame as used, if it is being used 
 	if(info_frame_no == 0) {
-		set_state(0, FrameState::Used);	
+		set_state(0, FrameState::HoS);	
 		nFreeFrames--;
 	}
 
@@ -236,6 +295,8 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 {
     // TODO: IMPLEMENTATION NEEEDED!
    
+	Console::puts("get_frames called: \n ");
+
 	// any frames left to allocate?
 	assert(nFreeFrames >= _n_frames);
 
@@ -264,14 +325,14 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 	// mark all frames in range as used
 	for(unsigned int i = frame_no + 1; i < frame_no + _n_frames - 1; i++) {
 		set_state(i, FrameState::Used);
-	}
+	}	
 
 	nFreeFrames -= _n_frames;
 
 	// don't have to check if overrun. Handled by assert above
 	Console::puts("ContframePool::get_frames working ?? :D\n");
 	
-    return frame_no + base_frame_no;
+    	return frame_no + base_frame_no;
 }
 
 
@@ -342,26 +403,22 @@ void ContFramePool::release_frames(unsigned long _first_frame_no)
 		frameNum++;
 	}
 
-
-	// call pool's personal release_frame 
-	// pool->_release_frames
-	
-	// check if first frame marked as HoS
-	/*
-	assert(get_state(_first_frame_no) == FrameState::Used);
-	
-	unsigned long fno = _first_frame_no;
-	while (get_state(fno) == FrameState::Used) {
-		set_state(fno, FrameState::Free);
-		fno++;
-		nFreeFrames++;
-	}	
-	*/
-
 }
 
 unsigned long ContFramePool::needed_info_frames(unsigned long _n_frames)
 {
-	int round = _n_frames / FRAME_SIZE == 0 ? 0 : 1;
-    return (_n_frames / FRAME_SIZE) + round;
+	int round ;
+	// convert nframes to bytes
+	// Note: 4 frames / bytes
+	// frames * ( 1 byte / 4 frames) = bytes
+	unsigned long neededBytes = _n_frames / 4;  
+	neededBytes += (_n_frames % 4) == 0 ? 0 : 1; // round
+
+
+	// 1 frame / FRAME_SIZE bytes 
+	// neededBytes * (1 frame / FRAME_SIZE bytes) = frames 
+	unsigned long neededFrames = neededBytes / FRAME_SIZE;
+	neededFrames += (neededBytes % FRAME_SIZE) == 0 ? 0 : 1;
+
+	return neededFrames;
 }
