@@ -202,6 +202,8 @@ void ContFramePool::set_state(unsigned long _frame_no, FrameState _state) {
 	// Used: 01
 	// HoS:  11 
 
+	// (unsigned char) _state
+	// 00 out then or
 	switch(_state) {
 		case FrameState::Free:
 			// 11 & 00 = 00
@@ -254,7 +256,7 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
 	// HOW do i know how much i need to manage frames??
 
 	// Bitmpa must fit into single frame
-	// assert(_n_frames <= FRAME_SIZE * 8);
+	// assert(_n_frames <= FRAME_SIZE * 4);
 
 	base_frame_no = _base_frame_no;
 	nframes = _n_frames;
@@ -269,13 +271,15 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
 	}
 	
 	
+	
 	unsigned long neededFrames = needed_info_frames(_n_frames);
 	base_frame_no += neededFrames; 
 	nFreeFrames -= neededFrames;
+	
 
 	// Everything fine-and-dandy. Proceed to mark all frames as free
 	
-	for(int fno = base_frame_no; fno < base_frame_no + nframes; fno++) {
+	for(int fno = 0; fno < nframes; fno++) {
 		// Console::puts ( "set_state here");
 		set_state(fno, FrameState::Free); 
 	}
@@ -284,10 +288,12 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
 
 	// mark first frame as used, if it is being used 
 	
+/*	
 	if(info_frame_no == 0) {
 		set_state(0, FrameState::HoS);	
 		nFreeFrames--;
 	}
+*/	
 	
 
 
@@ -326,11 +332,13 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 		frame_no++;
 	}
 
+	
 	frame_no -= _n_frames; // get first frame_no of sequence
 
+	mark_inaccessible(frame_no, _n_frames);
+	/*
 	// mark first frame in seq as HoS
 	set_state(frame_no, FrameState::HoS);
-	assert(get_state(frame_no) == FrameState::HoS);
 
 	// mark all frames in range as used
 	for(unsigned int i = frame_no + 1; i < frame_no + _n_frames - 1; i++) {
@@ -342,6 +350,7 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 	// don't have to check if overrun. Handled by assert above
 	Console::puts("ContframePool::get_frames working ?? :D\n");
 	
+	*/
     	return frame_no + base_frame_no;
 }
 
@@ -360,9 +369,11 @@ void ContFramePool::mark_inaccessible(unsigned long _base_frame_no,
 	// mark first frame in seq as HoS
 	set_state(_base_frame_no, FrameState::HoS);
 
-	for (int fno = _base_frame_no + 1; fno < _base_frame_no + _n_frames - 1; fno++) {
-		set_state(fno - _base_frame_no, FrameState::Used); // what is this minus buisness??
+	for (int fno = _base_frame_no + 1; fno < _base_frame_no + _n_frames; fno++) {
+		set_state(fno, FrameState::Used); // what is this minus buisness??
 	}
+
+	nFreeFrames -= _n_frames;
 	
     Console::puts("ContframePool::mark_inaccessible MIGHT work\n");
 }
