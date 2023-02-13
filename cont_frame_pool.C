@@ -137,7 +137,7 @@ ContFramePool::FrameState ContFramePool::get_state(unsigned long _frame_no) {
 	// elif pickBit == 3; 11 00 00 00 
 	
 	pickBit *= 2;
-	unsigned char mask = 0x11 << pickBit;
+	unsigned char mask = 0x3 << pickBit;
 
 	
 
@@ -152,11 +152,11 @@ ContFramePool::FrameState ContFramePool::get_state(unsigned long _frame_no) {
 
 	if (bitPair == 0x00) {
 		return FrameState::Free;
-	} else if (bitPair == 0x01) {
+	} else if (bitPair == 0x1) {
 		return FrameState::Used;
-	} else if(bitPair == 0x11) {
+	} else if(bitPair == 0x3) {
 		return FrameState::HoS;
-	} else if (bitPair == 0x01) {
+	} else if (bitPair == 0x2) {
 		Console::puts("get_state: bitPair result: 2 WRONG \n ");
 		assert(false);
 	} else {
@@ -195,7 +195,7 @@ void ContFramePool::set_state(unsigned long _frame_no, FrameState _state) {
 	// elif pickBit == 3; 11 00 00 00 
 	
 	pickBit *= 2;
-	unsigned char mask = 0x11 << pickBit;
+	unsigned char mask = 0x3 << pickBit;
 	
 
 	// Free: 00
@@ -215,10 +215,15 @@ void ContFramePool::set_state(unsigned long _frame_no, FrameState _state) {
 			bitmap[bitmap_index] |= mask;
 			break;
 		case FrameState::HoS:
+			
 			bitmap[bitmap_index] |= mask;
 			break;
 	}
 	
+	Console::puts("\nasserting get_state: ");
+	Console::puti((int)_state);
+	assert(get_state(_frame_no) == _state);
+	Console::puts("done get_state \n");
 }
 
 
@@ -269,17 +274,21 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
 	nFreeFrames -= neededFrames;
 
 	// Everything fine-and-dandy. Proceed to mark all frames as free
+	
 	for(int fno = base_frame_no; fno < base_frame_no + nframes; fno++) {
-		Console::puts ( "set_state here");
+		// Console::puts ( "set_state here");
 		set_state(fno, FrameState::Free); 
 	}
+	
 
 
 	// mark first frame as used, if it is being used 
+	
 	if(info_frame_no == 0) {
 		set_state(0, FrameState::HoS);	
 		nFreeFrames--;
 	}
+	
 
 
 
@@ -321,6 +330,7 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 
 	// mark first frame in seq as HoS
 	set_state(frame_no, FrameState::HoS);
+	assert(get_state(frame_no) == FrameState::HoS);
 
 	// mark all frames in range as used
 	for(unsigned int i = frame_no + 1; i < frame_no + _n_frames - 1; i++) {
