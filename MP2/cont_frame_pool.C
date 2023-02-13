@@ -255,26 +255,18 @@ ContFramePool::ContFramePool(unsigned long _base_frame_no,
 	nframes = _n_frames;
 	info_frame_no = _info_frame_no;
 
+
 	// if _info_frame_no is zero, then we keep management info in the first
 	// frame, else we use the provided frame to keep managment info
 	if(info_frame_no == 0) {
 		bitmap = (unsigned char *) (base_frame_no * FRAME_SIZE);
-
-
-		// base_frame_no += neededFrames; 
-		// nFreeFrames -= neededFrames;
-
 	} else {
 		bitmap = (unsigned char *) (info_frame_no * FRAME_SIZE);
 	}
 	
 	
-	
-	
-
 	// Everything fine-and-dandy. Proceed to mark all frames as free
 	for(int fno = 0; fno < nframes; fno++) {
-		Console::puts ( "set_state here");
 		set_state(fno, FrameState::Free); 
 	}
 
@@ -304,8 +296,6 @@ unsigned long ContFramePool::get_frames(unsigned int _n_frames)
 		assert(false);
 		return 0;
 	}
-
-
 	
 	// find first frame_no of sequence of free frames
 	// mark frame seq as used in bitmap 
