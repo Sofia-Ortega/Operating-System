@@ -40,8 +40,8 @@ PageTable::PageTable()
 		address = address + 4096;
 	}
 
-	page_directory[0] = page_table; // directly mapped
-	page_directory[0] |= 0b011; // directly mapped
+	page_directory[0] = *page_table; // directly mapped
+	page_directory[0] |= 0b011; 
 
 	// populate page directory
 	// Note: already filled index 0 -> start at i = 1
@@ -70,10 +70,10 @@ void PageTable::enable_paging()
 	
 	unsigned long mask = 0b1 << 31;
 	cr0Bits |= mask;
-	write_cr0(cr0Bit);
+	write_cr0(cr0Bits);
 
 	// update static variable
-	paging_enabled = 1
+	paging_enabled = 1;
 
    Console::puts("Enabled paging\n");
 }
