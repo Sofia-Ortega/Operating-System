@@ -40,7 +40,7 @@ PageTable::PageTable()
 		address = address + 4096;
 	}
 
-	page_directory[0] = *page_table; // directly mapped
+	page_directory[0] = (unsigned long) page_table; // directly mapped
 	page_directory[0] |= 0b011; 
 
 	// populate page directory
@@ -58,7 +58,7 @@ void PageTable::load()
 {
 
 	current_page_table = this;
-	write_cr3(*page_directory);
+	write_cr3((unsigned long) page_directory);
 
    Console::puts("Loaded page table\n");
 }
