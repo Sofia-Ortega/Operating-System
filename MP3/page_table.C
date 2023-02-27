@@ -81,34 +81,15 @@ void PageTable::enable_paging()
 void PageTable::handle_fault(REGS * _r)
 {
 	
-	Console::puts("Handling following pg fault: ");
-	Console::puti((int) _r->err_code);
-	Console::puts("\n");
-		
 
+	// get faulting address
 	unsigned long address32 = read_cr2();
-
-
-	Console::puts("Address: ");
-	Console::putui(address32);
-	Console::puts("\n");
-
 
 
 	// parse address 32
 	unsigned long mask = 0b1111111111 << 12;
 	unsigned long pgDirIndex = address32 >> 22; // first 10 bits
 	unsigned long pgNumber = (address32 & mask) >> 12; // middle 10 bits
-
-
-	Console::puts("pgDirIndex: ");
-	Console::putui(pgDirIndex);
-	Console::puts("\n");
-
-	Console::puts("pgNumber: ");
-	Console::putui(pgNumber);
-	Console::puts("\n");
-
 
 
 	// Page Directory Address
@@ -124,31 +105,14 @@ void PageTable::handle_fault(REGS * _r)
 	if (!present) {
 		
 		unsigned long frameNumber = kernel_mem_pool->get_frames(1);
-
-/*
-		Console::puts("frameNumber: ");
-		Console::putui(frameNumber);
-		Console::puts("\n");
-		
-		Console::puts("old entry: ");
-		Console::putui(pageDirectory[pgDirIndex]);
-		Console::puts("\n");
-*/
-
 		pageDirectory[pgDirIndex] = (frameNumber * PAGE_SIZE) | 0b11; // set present & read/write
 		
 
+		// initialize page table entires to 0
 		unsigned long* pageTable = (unsigned long*) (frameNumber * PAGE_SIZE);
-
 		for(unsigned int i = 0; i < 1024; i++) {
 			pageTable[i] = 0;
 		}
-
-
-		Console::puts("updated entry: ");
-		Console::putui(pageDirectory[pgDirIndex]);
-		Console::puts("\n");
-
 
   		Console::puts("Handled page fault in page DIRECTORY\n\n\n");
 
@@ -157,21 +121,9 @@ void PageTable::handle_fault(REGS * _r)
 	}
 
 	// get page table entry	
-
-	Console::puts("pg table frame address location entry: ");
-	Console::putui(pgDirEntry);
-	Console::puts("\n");
-
-
-	
 	unsigned long* pgTable = (unsigned long*) ( (pgDirEntry >> 12) << 12 );
 	unsigned long pgTableEntry = pgTable[pgNumber];
 
-/*
-	Console::puts("pg table entry: ");
-	Console::putui(pgTableEntry);
-	Console::puts("\n");
-*/
 
 	// check if page table entry VALID
 	present = pgTableEntry & 0b1;
@@ -179,37 +131,14 @@ void PageTable::handle_fault(REGS * _r)
 	if (!present) {
 
 		unsigned long frameNumber = process_mem_pool->get_frames(1);
-		
-/*
-		Console::puts("frameNumber: ");
-		Console::putui(frameNumber);
-		Console::puts("\n");
-
-*/
-
-/*
-		Console::puts("old entry: ");
-		Console::putui(pgTable[pgNumber]);
-		Console::puts("\n");
-
-*/
 		pgTable[pgNumber] = (frameNumber * PAGE_SIZE) | 0b11; 
 
-/*
-		Console::puts("updated entry: ");
-		Console::putui(updatedPgTable);
-		Console::puts("\n");
-
-*/
   		Console::puts("Handled page fault in page TABLE\n\n\n");
-
 		return;
-
 	}
 
 
 	Console::puts("[WARNING] Page fault NOT handled. Page direcctory & table marked present");
-	assert(false);
 	
 }
 
