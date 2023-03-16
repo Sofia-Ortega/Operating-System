@@ -1,0 +1,92 @@
+/*
+ File: vm_pool.C
+ 
+ Author:
+ Date  :
+ 
+ */
+
+/*--------------------------------------------------------------------------*/
+/* DEFINES */
+/*--------------------------------------------------------------------------*/
+
+/* -- (none) -- */
+
+/*--------------------------------------------------------------------------*/
+/* INCLUDES */
+/*--------------------------------------------------------------------------*/
+
+#include "vm_pool.H"
+#include "console.H"
+#include "utils.H"
+#include "assert.H"
+#include "simple_keyboard.H"
+
+/*--------------------------------------------------------------------------*/
+/* DATA STRUCTURES */
+/*--------------------------------------------------------------------------*/
+
+/* -- (none) -- */
+
+/*--------------------------------------------------------------------------*/
+/* CONSTANTS */
+/*--------------------------------------------------------------------------*/
+
+/* -- (none) -- */
+
+/*--------------------------------------------------------------------------*/
+/* FORWARDS */
+/*--------------------------------------------------------------------------*/
+
+/* -- (none) -- */
+
+/*--------------------------------------------------------------------------*/
+/* METHODS FOR CLASS   V M P o o l */
+/*--------------------------------------------------------------------------*/
+
+VMPool::VMPool(unsigned long  _base_address,
+               unsigned long  _size,
+               ContFramePool *_frame_pool,
+               PageTable     *_page_table) {
+
+    
+    base_address = _base_address;
+    size = _size;
+    frame_pool = _frame_pool;
+    page_table = _page_table;
+
+    Console::puts("Constructed VMPool object.\n");
+}
+
+unsigned long VMPool::allocate(unsigned long _size) {
+
+    assert(false);
+
+    unsigned long first_frame = frame_pool->get_frames(_size);
+    
+
+
+
+
+    Console::puts("Allocated region of memory.\n");
+
+    return 0;
+}
+
+void VMPool::release(unsigned long _start_address) {
+    assert(false);
+    Console::puts("Released region of memory.\n");
+}
+
+bool VMPool::is_legitimate(unsigned long _address) {
+
+    bool legit = false;
+    if (_address > base_address && _address < base_address + size) {
+        legit = true;
+    }
+
+    Console::puts("Checked whether address is part of an allocated region.\n");
+
+    return legit;
+}
+
