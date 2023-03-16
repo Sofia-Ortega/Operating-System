@@ -55,7 +55,20 @@ private:
     
     /* DATA FOR CURRENT PAGE TABLE */
     unsigned long        * page_directory;     /* where is page directory located? */
+
+
+    struct poolNode {
+        VMPool* pool;
+        poolNode* next;
+        poolNode(VMPool* _pool, poolNode* _next) {
+            pool = _pool;
+            next = _next;
+        }
+    };
+
+    poolNode* poolHead;
     
+
     unsigned long* PDE_address(unsigned long index);
     unsigned long* PTE_address(unsigned long pgDirIndex, unsigned long index);
 

@@ -42,6 +42,7 @@ void PageTable::init_paging(ContFramePool * _kernel_mem_pool,
 
 PageTable::PageTable()
 {
+    poolList = nullptr;
 
     // frames * (bytes / frames) = bytes (address)
     unsigned long startAddress = process_mem_pool->get_frames(1) * PAGE_SIZE;
@@ -89,6 +90,23 @@ void PageTable::handle_fault(REGS * _r)
 
     // get faulting address
     unsigned long address32 = read_cr2();
+
+    // check if address legitimate
+    bool legit = false;
+    poolNode* current = current_page_table->poolHead;
+    while(current != nullptr) {
+        if(current->pool->is_legitimate(address32)) {
+            legit = true;
+            break;
+        }
+        current = current->next;
+    }
+
+    if(!legit) {
+        Console::puts("Illegitmate Address given - not found in vmpools");
+        return;
+    }
+
 
     // parse address 32
     unsigned long mask =  0b1111111111 << 12;
@@ -142,7 +160,14 @@ void PageTable::handle_fault(REGS * _r)
 
 void PageTable::register_pool(VMPool * _vm_pool)
 {
-    assert(false);
+
+    if ( poolHead == nullptr ) {
+        poolHead = &poolNode(_vm_pool, nullptr);
+    } else {
+        poolHead = &poolNode(_vm_pool, poolHead);
+    }
+
+
     Console::puts("registered VM pool\n");
 }
 
