@@ -47,6 +47,8 @@ PageTable::PageTable()
     unsigned long startAddress = process_mem_pool->get_frames(1) * PAGE_SIZE;
     page_directory = (unsigned long*) startAddress;
 
+    poolRegister = (unsigned long*) ( process_mem_pool->get_frames(1) * PAGE_SIZE);
+
     // populate page directory
     for(unsigned int i = 0; i < 1023; i++) {
         page_directory[i] = 0 | 0b010; // supervisor, read & write, NOT present
@@ -90,21 +92,7 @@ void PageTable::handle_fault(REGS * _r)
     // get faulting address
     unsigned long address32 = read_cr2();
 
-    // check if address legitimate
-    bool legit = false;
-    poolNode* current = current_page_table->poolHead;
-    while(current != nullptr) {
-        if(current->pool->is_legitimate(address32)) {
-            legit = true;
-            break;
-        }
-        current = current->next;
-    }
-
-    if(!legit) {
-        Console::puts("Illegitmate Address given - not found in vmpools");
-        return;
-    }
+    // FIXME: check if address is legitmate
 
 
     // parse address 32
@@ -159,15 +147,7 @@ void PageTable::handle_fault(REGS * _r)
 
 void PageTable::register_pool(VMPool * _vm_pool)
 {
-
-/*
-    if ( poolHead == nullptr ) {
-        poolHead = &poolNode(_vm_pool, nullptr);
-    } else {
-        poolHead = &poolNode(_vm_pool, poolHead);
-    }
-*/
-
+    
     Console::puts("NOT registered VM pool\n");
     assert(false);
 }
