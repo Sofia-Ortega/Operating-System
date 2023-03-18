@@ -193,15 +193,7 @@ void PageTable::handle_fault(REGS * _r)
 
 void PageTable::register_pool(VMPool * _vm_pool)
 {
-
-/*
-    if ( poolHead == nullptr ) {
-        poolHead = &poolNode(_vm_pool, nullptr);
-    } else {
-        poolHead = &poolNode(_vm_pool, poolHead);
-    }
-*/
-
+    
     Console::puts("NOT registered VM pool\n");
     assert(false);
 }
