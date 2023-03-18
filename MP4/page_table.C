@@ -43,18 +43,69 @@ void PageTable::init_paging(ContFramePool * _kernel_mem_pool,
 PageTable::PageTable()
 {
 
-    // frames * (bytes / frames) = bytes (address)
-    unsigned long startAddress = process_mem_pool->get_frames(1) * PAGE_SIZE;
-    page_directory = (unsigned long*) startAddress;
+	// frames * bytes / frames = bytes (address)
+	unsigned long startAddress = kernel_mem_pool->get_frames(1) * PAGE_SIZE; 
+	page_directory = (unsigned long*) startAddress;
 
-    // populate page directory
-    for(unsigned int i = 0; i < 1023; i++) {
-        page_directory[i] = 0 | 0b010; // supervisor, read & write, NOT present
-    }
+	// page table -> array of pg table entries
+	startAddress = process_mem_pool->get_frames(1) * PAGE_SIZE;
+	unsigned long* page_table = (unsigned long*) startAddress; // start of pg table
 
-    // recursive page look up
-    page_directory[1023] = startAddress | 0b011; // supervisor, read & write, present
-    
+	// first 4MB directly map
+	unsigned long address = 0;
+	for (unsigned int i = 0; i < 1024; i++) { // first 4MB
+		page_table[i] = address | 0b011; // supervisor, read & write, present
+		address = address + 4096;
+	}
+
+
+	page_directory[0] = (unsigned long) page_table; // directly mapped
+	page_directory[0] |= 0b011; 
+
+	// populate page directory
+	// Note: already filled index 0 -> start at i = 1
+	for (unsigned int i = 1; i < 1024; i++) { // first 4MB
+		page_directory[i] = 0 | 0b010; // supervisor, read & write, NOT present
+	}
+
+    // recursive lookup
+    page_table[1023] = (unsigned long) page_table;
+    page_directory[1023] = (unsigned long) page_directory;
+	
+	
+   Console::puts("Constructed Page Table object\n");
+    // // frames * (bytes / frames) = bytes (address)
+    // unsigned long startAddress = process_mem_pool->get_frames(1) * PAGE_SIZE;
+    // page_directory = (unsigned long*) startAddress;
+
+
+    // // page table
+    // unsigned long startAddress2 = process_mem_pool->get_frames(1) * PAGE_SIZE;
+    // unsigned long* page_table = ( unsigned long* ) ( startAddress2 );
+
+    // // first 4MB directly mapped
+    // unsigned long address = 0;
+    // for(unsigned int i = 0; i < 1024; i++) {
+    //     page_table[i] = address | 0b011;
+    //     address += 4096;
+    // }
+
+    // // recursive
+    // page_table[1023] = (unsigned long) page_table;
+
+    // // connect page directory and page table
+    // page_directory[0] = (unsigned long) page_table;
+    // page_directory[0] |= 0b011;
+
+
+    // // populate page directory
+    // for(unsigned int i = 0; i < 1023; i++) {
+    //     page_directory[i] = 0 | 0b010; // supervisor, read & write, NOT present
+    // }
+
+    // // recursive page look up
+    // page_directory[1023] = (startAddress) | 0b011; // supervisor, read & write, present
+
 
     Console::puts("Constructed Page Table object\n");
 }
@@ -89,23 +140,6 @@ void PageTable::handle_fault(REGS * _r)
 
     // get faulting address
     unsigned long address32 = read_cr2();
-
-    // check if address legitimate
-    bool legit = false;
-    poolNode* current = current_page_table->poolHead;
-    while(current != nullptr) {
-        if(current->pool->is_legitimate(address32)) {
-            legit = true;
-            break;
-        }
-        current = current->next;
-    }
-
-    if(!legit) {
-        Console::puts("Illegitmate Address given - not found in vmpools");
-        return;
-    }
-
 
     // parse address 32
     unsigned long mask =  0b1111111111 << 12;
