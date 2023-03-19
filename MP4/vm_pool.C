@@ -57,10 +57,10 @@ VMPool::VMPool(unsigned long  _base_address,
 
 
     // use logical address 1 | 0 | 0 for list
-    free_list = 0b1 << 22;
+    free_list = (long unsigned *) ( 0b1 << 22 );
 
     // use logical address 1 | 1 | 0 for allocated list
-    allocated_list = (0b1 << 22) | (0b1 << 12);
+    allocated_list = (long unsigned *) ((0b1 << 22) | (0b1 << 12));
     allocated_list_size = 0;
 
 
@@ -90,7 +90,7 @@ unsigned long VMPool::allocate(unsigned long _size) {
             // split free list
 
             // add to end of allocated list
-            allocated_index = allocated_list_size * 2;
+            unsigned long allocated_index = allocated_list_size * 2;
             allocated_list[allocated_index] = available_address;
             allocated_list_size += 2;
 
@@ -110,24 +110,43 @@ unsigned long VMPool::allocate(unsigned long _size) {
 }
 
 void VMPool::release(unsigned long _start_address) {
-    assert(false);
     
+    for(unsigned long i = 0; i < allocated_list_size * 2; i += 2) {
+        if(_start_address == allocated_list[i]) {
+            unsigned long free_list_index = free_list_size * 2;
 
+            free_list[free_list_index] = allocated_list[i];
+            free_list[free_list_index + 1] = allocated_list[i+1];
 
-    Console::puts("Released region of memory.\n");
+            allocated_list_size -= 2;
+            free_list_size += 2;
+
+            Console::puts("Released region of memory.\n");
+            return;
+        }
+    }
+
+    Console::puts("[WARNING] Failed to release region of memory.\n");
+
 }
 
 bool VMPool::is_legitimate(unsigned long _address) {
 
     Console::puts("Checking whether address is part of an allocated region.\n");
 
+    // mark first 2 frames holding free list and allocated list as legit
     if(_address == (unsigned long) free_list || _address == (unsigned long) allocated_list) {
         return true;
     }
 
-    // FIXME
-    if (_address > base_address && _address < base_address + size) {
-        return true;
+    // make sure in vm pool bounds
+    if (! (_address > base_address && _address < base_address + size ) ) {
+        return false;
+    }
+
+    // look for address in allocated list
+    for(unsigned long i = 0; i < allocated_list_size * 2; i += 2) {
+        if (_address == allocated_list[i]) return true;
     }
 
 
