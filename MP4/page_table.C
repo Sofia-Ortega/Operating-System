@@ -43,6 +43,8 @@ void PageTable::init_paging(ContFramePool * _kernel_mem_pool,
 PageTable::PageTable()
 {
 
+    pool_list_size = 0;
+
 	// frames * bytes / frames = bytes (address)
 	unsigned long startAddress = kernel_mem_pool->get_frames(1) * PAGE_SIZE; 
 	page_directory = (unsigned long*) startAddress;
@@ -143,25 +145,31 @@ void PageTable::handle_fault(REGS * _r)
     // get faulting address
     unsigned long address32 = read_cr2();
 
+
+    // check if address is legitimate
+    bool legit = false;
+    for(unsigned long i = 0; i < current_page_table->pool_list_size; i++) {
+        if(current_page_table->pool_list[i]->is_legitimate(address32)) {
+            legit = true;
+            break;
+        }
+    }
+
+    if(!legit) {
+        Console::puts("[ERROR] Address is NOT legitimate");
+        return;
+    }
+    
+
     // parse address 32
     unsigned long mask =  0b1111111111 << 12;
     unsigned long pgDirIndex = address32 >> 22; // first 10 bits
     unsigned pgTableIndex = (address32 & mask) >> 12; // middle 10 bits
 
-    Console::puts("here\n");
-
     // get page directory entry
     unsigned long* directoryEntryAddress = current_page_table->PDE_address(pgDirIndex);
     unsigned long directoryEntry = *directoryEntryAddress;
-    Console::puts("there\n");
 
-    // Console::puts("directoryEntryAddress: ");
-    // Console::putui((unsigned long) directoryEntryAddress);
-    // Console::puts("\n");
-    // Console::puts("directoryEntry: ");
-    // Console::putui(directoryEntry);
-    // Console::puts("\n");
-    // check if pg directory entry VALID
     bool present = directoryEntry & 0b1;
 
     if(!present) {
@@ -206,12 +214,53 @@ void PageTable::handle_fault(REGS * _r)
 
 void PageTable::register_pool(VMPool * _vm_pool)
 {
-    
-    Console::puts("NOT registered VM pool\n");
-    assert(false);
+    pool_list[pool_list_size++] = _vm_pool;
+
+    Console::puts("registered VM pool\n");
 }
 
 void PageTable::free_page(unsigned long _page_no) {
-    assert(false);
+
+
+    //----- check if is page valid ------
+    // parse address 32
+    unsigned long address32 = _page_no;
+
+    unsigned long mask =  0b1111111111 << 12;
+    unsigned long pgDirIndex = address32 >> 22; // first 10 bits
+    unsigned pgTableIndex = (address32 & mask) >> 12; // middle 10 bits
+
+    // get page directory entry
+    unsigned long* directoryEntryAddress = current_page_table->PDE_address(pgDirIndex);
+    unsigned long directoryEntry = *directoryEntryAddress;
+
+    bool pde_present = directoryEntry & 0b1;
+
+    if(!pde_present) {
+        Console::puts("PDE is NOT valid in free page");
+        return;
+    }
+
+
+    // check if page table entry VALID
+    unsigned long* pgTableEntryAddr = current_page_table->PTE_address(pgDirIndex, pgTableIndex);
+    unsigned long pgTableEntry = *pgTableEntryAddr;
+
+    bool pte_present = pgTableEntry & 0b1;
+
+    if(!pte_present) {
+        Console::puts("PTE is NOT valid in free page");
+        return;
+    }
+
+
+    // free page
+    unsigned long frameNumber = pgTableEntry >> 12;
+    process_mem_pool->release_frames(frameNumber);
+
+
+    // flush TLB
+    write_cr3( (unsigned long ) page_directory);
+    
     Console::puts("freed page\n");
 }

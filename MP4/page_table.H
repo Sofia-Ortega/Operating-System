@@ -55,7 +55,9 @@ private:
     
     /* DATA FOR CURRENT PAGE TABLE */
     unsigned long        * page_directory;     /* where is page directory located? */
-    unsigned long        * poolRegister;
+
+    VMPool* pool_list[10];
+    unsigned long pool_list_size;
     
 
     unsigned long* PDE_address(unsigned long index);
