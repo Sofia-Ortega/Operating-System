@@ -260,7 +260,7 @@ void PageTable::free_page(unsigned long _page_no) {
 
 
     // flush TLB
-    write_cr3( (unsigned long ) page_directory);
+    write_cr3( (unsigned long) page_directory);
     
     Console::puts("freed page\n");
 }

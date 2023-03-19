@@ -44,6 +44,13 @@ class PageTable;
 class VMPool { /* Virtual Memory Pool */
 private:
    /* -- DEFINE YOUR VIRTUAL MEMORY POOL DATA STRUCTURE(s) HERE. */
+   unsigned long* free_list;
+   unsigned long* allocated_list;
+
+   unsigned long free_list_size;
+   unsigned long allocated_list_size;
+
+
    unsigned long base_address;
    unsigned long size;
    ContFramePool* frame_pool;
