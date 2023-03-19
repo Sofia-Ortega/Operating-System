@@ -69,8 +69,8 @@ PageTable::PageTable()
 	}
 
     // recursive lookup
-    page_table[1023] = (unsigned long) page_table;
-    page_directory[1023] = (unsigned long) page_directory;
+    page_table[1023] = (unsigned long) page_table | 0b011;
+    page_directory[1023] = (unsigned long) page_directory | 0b011;
 	
 	
    Console::puts("Constructed Page Table object\n");
@@ -138,6 +138,8 @@ void PageTable::enable_paging()
 void PageTable::handle_fault(REGS * _r)
 {
 
+
+    // Console::puts("handling fault now...");
     // get faulting address
     unsigned long address32 = read_cr2();
 
@@ -146,11 +148,19 @@ void PageTable::handle_fault(REGS * _r)
     unsigned long pgDirIndex = address32 >> 22; // first 10 bits
     unsigned pgTableIndex = (address32 & mask) >> 12; // middle 10 bits
 
+    Console::puts("here\n");
 
     // get page directory entry
     unsigned long* directoryEntryAddress = current_page_table->PDE_address(pgDirIndex);
     unsigned long directoryEntry = *directoryEntryAddress;
+    Console::puts("there\n");
 
+    // Console::puts("directoryEntryAddress: ");
+    // Console::putui((unsigned long) directoryEntryAddress);
+    // Console::puts("\n");
+    // Console::puts("directoryEntry: ");
+    // Console::putui(directoryEntry);
+    // Console::puts("\n");
     // check if pg directory entry VALID
     bool present = directoryEntry & 0b1;
 
@@ -168,6 +178,9 @@ void PageTable::handle_fault(REGS * _r)
         // recursive page table lookup 
         unsigned long* pageTableAddress = current_page_table->PTE_address(pgDirIndex, 1023);
         *pageTableAddress = (unsigned long) current_page_table->PTE_address(pgDirIndex, 0);
+
+        Console::puts("Handled page fault in page DIRECTORY\n\n\n");
+
 
         return;
     }

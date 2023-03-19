@@ -31,7 +31,7 @@
 00000000000i[      ]   SB16 support: no
 00000000000i[      ]   USB support: no
 00000000000i[      ]   VGA extension support: vbe
-00000000000i[MEM0  ] allocated memory at 0x7f3fb8119010. after alignment, vector=0x7f3fb811a000
+00000000000i[MEM0  ] allocated memory at 0x7f39b3068010. after alignment, vector=0x7f39b3069000
 00000000000i[MEM0  ] 32.00MB
 00000000000i[MEM0  ] mem block size = 0x00100000, blocks=32
 00000000000i[MEM0  ] rom at 0xfffe0000/131072 ('BIOS-bochs-latest')
@@ -163,31 +163,31 @@
 00001773537i[BIOS  ] ACPI tables: RSDP addr=0x000fb970 ACPI DATA addr=0x01ff0000 size=0x9d8
 00001793070i[PCI   ] i440FX PMC write to PAM register 59 (TLB Flush)
 00001794082i[BIOS  ] bios_table_cur_addr: 0x000fb994
-00200977341i[XGUI  ] charmap update. Font Height is 16
-01776399367i[BIOS  ] Booting from 0000:7c00
-01790243989i[XGUI  ] charmap update. Font Height is 16
-01797925525i[XGUI  ] charmap update. Font Height is 16
-01809051711i[XGUI  ] charmap update. Font Height is 16
-04384864000i[      ] cpu loop quit, shutting down simulator
-04384864000i[CPU0  ] CPU is in protected mode (active)
-04384864000i[CPU0  ] CS.mode = 32 bit
-04384864000i[CPU0  ] SS.mode = 32 bit
-04384864000i[CPU0  ] EFER   = 0x00000000
-04384864000i[CPU0  ] | EAX=00000000  EBX=00103058  ECX=00000001  EDX=000b03d4
-04384864000i[CPU0  ] | ESP=00105f70  EBP=00105fe8  ESI=000263d3  EDI=000263df
-04384864000i[CPU0  ] | IOPL=0 id vip vif ac vm rf nt of df IF tf sf zf af pf cf
-04384864000i[CPU0  ] | SEG sltr(index|ti|rpl)     base    limit G D
-04384864000i[CPU0  ] |  CS:0008( 0001| 0|  0) 00000000 ffffffff 1 1
-04384864000i[CPU0  ] |  DS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-04384864000i[CPU0  ] |  SS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-04384864000i[CPU0  ] |  ES:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-04384864000i[CPU0  ] |  FS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-04384864000i[CPU0  ] |  GS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-04384864000i[CPU0  ] | EIP=00100704 (00100704)
-04384864000i[CPU0  ] | CR0=0xe0000011 CR2=0x00400000
-04384864000i[CPU0  ] | CR3=0x00202000 CR4=0x00000000
-04384864000i[CPU0  ] 0x00100704>> jmp .-2 (0x00100704) : EBFE
-04384864000i[CMOS  ] Last time is 946682296 (Fri Dec 31 17:18:16 1999)
-04384864000i[XGUI  ] Exit
-04384864000i[      ] restoring default signal behavior
-04384864000i[SIM   ] quit_sim called with exit code 1
+00313092689i[XGUI  ] charmap update. Font Height is 16
+02171889909i[BIOS  ] Booting from 0000:7c00
+02184654685i[XGUI  ] charmap update. Font Height is 16
+02188104221i[XGUI  ] charmap update. Font Height is 16
+02199887747i[XGUI  ] charmap update. Font Height is 16
+03218940000i[      ] cpu loop quit, shutting down simulator
+03218940000i[CPU0  ] CPU is in protected mode (active)
+03218940000i[CPU0  ] CS.mode = 32 bit
+03218940000i[CPU0  ] SS.mode = 32 bit
+03218940000i[CPU0  ] EFER   = 0x00000000
+03218940000i[CPU0  ] | EAX=00000000  EBX=00103058  ECX=00000001  EDX=000b03d4
+03218940000i[CPU0  ] | ESP=00105f68  EBP=00105f68  ESI=000263d3  EDI=000263df
+03218940000i[CPU0  ] | IOPL=0 id vip vif ac vm rf nt of df IF tf sf ZF af PF cf
+03218940000i[CPU0  ] | SEG sltr(index|ti|rpl)     base    limit G D
+03218940000i[CPU0  ] |  CS:0008( 0001| 0|  0) 00000000 ffffffff 1 1
+03218940000i[CPU0  ] |  DS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+03218940000i[CPU0  ] |  SS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+03218940000i[CPU0  ] |  ES:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+03218940000i[CPU0  ] |  FS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+03218940000i[CPU0  ] |  GS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+03218940000i[CPU0  ] | EIP=001017d5 (001017d5)
+03218940000i[CPU0  ] | CR0=0xe0000011 CR2=0x004ff000
+03218940000i[CPU0  ] | CR3=0x00202000 CR4=0x00000000
+03218940000i[CPU0  ] 0x001017d5>> jmp .-11 (0x001017cc) : EBF5
+03218940000i[CMOS  ] Last time is 946682004 (Fri Dec 31 17:13:24 1999)
+03218940000i[XGUI  ] Exit
+03218940000i[      ] restoring default signal behavior
+03218940000i[SIM   ] quit_sim called with exit code 1
