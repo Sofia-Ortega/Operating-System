@@ -56,21 +56,22 @@ VMPool::VMPool(unsigned long  _base_address,
     page_table = _page_table;
 
 
+    // register pool
+    _page_table->register_pool(this);
+
     // use logical address 1 | 0 | 0 for list
-    free_list = (long unsigned *) ( 0b1 << 22 );
+    free_list = (unsigned long *) base_address;
 
     // use logical address 1 | 1 | 0 for allocated list
-    allocated_list = (long unsigned *) ((0b1 << 22) | (0b1 << 12));
+    allocated_list = (unsigned long* ) (base_address + page_table->PAGE_SIZE);
     allocated_list_size = 0;
 
 
     // even indexes: base addresses
-    // odd indexes: no of pages allocated 
-    free_list[0] = _base_address;
+    // odd indexes: number of pages  
+    free_list[0] = _base_address + 2*_page_table->PAGE_SIZE; // start 2 frames after where lists stored
     free_list[1] = _size / _page_table->PAGE_SIZE;
     free_list_size = 1;
-
-
     
 
     Console::puts("Constructed VMPool object.\n");
@@ -82,9 +83,11 @@ unsigned long VMPool::allocate(unsigned long _size) {
     unsigned long needed_pages = _size / page_table->PAGE_SIZE;
     if (_size % page_table->PAGE_SIZE != 0) needed_pages++; // rounding
 
+
+    // find free space in list
     for(unsigned long i = 0; i < free_list_size * 2; i += 2) {
-        unsigned long available_pages = free_list[i + 1];
         unsigned long available_address = free_list[i];
+        unsigned long available_pages = free_list[i + 1];
 
         if(available_pages > needed_pages) {
             // split free list
@@ -92,13 +95,14 @@ unsigned long VMPool::allocate(unsigned long _size) {
             // add to end of allocated list
             unsigned long allocated_index = allocated_list_size * 2;
             allocated_list[allocated_index] = available_address;
-            allocated_list_size += 2;
+            allocated_list[allocated_index + 1] = needed_pages;
+            allocated_list_size++;
 
             // update free list
-            free_list[i] = available_address + page_table->PAGE_SIZE;// shift down one page
+            free_list[i] = available_address + (needed_pages * page_table->PAGE_SIZE);// shift down needed page
             free_list[i+1] = available_pages - needed_pages;
 
-            Console::puts("Allocated region of memory.\n");
+            Console::puts("Allocated region of memory: \n");
             return available_address;
         }
     }
@@ -113,15 +117,38 @@ void VMPool::release(unsigned long _start_address) {
     
     for(unsigned long i = 0; i < allocated_list_size * 2; i += 2) {
         if(_start_address == allocated_list[i]) {
-            unsigned long free_list_index = free_list_size * 2;
 
+            // add back to free list
+            unsigned long free_list_index = free_list_size * 2;
             free_list[free_list_index] = allocated_list[i];
             free_list[free_list_index + 1] = allocated_list[i+1];
 
-            allocated_list_size -= 2;
-            free_list_size += 2;
+            // release each page allocated
+            unsigned long num_pages = allocated_list[i+1];
+            unsigned long address = _start_address;
+            for(unsigned long j = 0; j < num_pages; j++) {
+                page_table->free_page(address);
+                address += page_table->PAGE_SIZE;
+            }
 
-            Console::puts("Released region of memory.\n");
+            // // remove from allocated list
+            unsigned long last_index = (allocated_list_size - 1) * 2;
+            allocated_list[i] = allocated_list[last_index];
+            allocated_list[i+1] = allocated_list[last_index + 1];
+
+            // update sizes of list
+            allocated_list_size--;
+            free_list_size++;
+
+
+            Console::puts("Released region of memory:\n");
+            Console::putui(_start_address);
+            Console::puts("\n");
+            Console::putui(allocated_list[i]);
+            Console::puts("\n");
+            Console::putui(allocated_list_size);
+            Console::puts("\n");
+
             return;
         }
     }
@@ -134,20 +161,27 @@ bool VMPool::is_legitimate(unsigned long _address) {
 
     Console::puts("Checking whether address is part of an allocated region.\n");
 
-    // mark first 2 frames holding free list and allocated list as legit
-    if(_address == (unsigned long) free_list || _address == (unsigned long) allocated_list) {
-        return true;
-    }
+    Console::puts("_address: ");
+    Console::putui( _address);
 
-    // make sure in vm pool bounds
-    if (! (_address > base_address && _address < base_address + size ) ) {
-        return false;
-    }
+    if (_address < base_address || _address > base_address + size) return false;
+
+    // mark first 2 frames holding free list and allocated list as legit
+    if(_address >= (unsigned long ) free_list 
+        && _address < ((unsigned long) allocated_list ) + page_table->PAGE_SIZE) return true;
 
     // look for address in allocated list
     for(unsigned long i = 0; i < allocated_list_size * 2; i += 2) {
-        if (_address == allocated_list[i]) return true;
+
+        unsigned long i_address = allocated_list[i];
+        Console::puts("address");
+        Console::putui(i_address);
+        unsigned long i_size = allocated_list[i+1] * page_table->PAGE_SIZE;
+
+        if (_address >= i_address 
+            && _address <= i_address + i_size) return true;
     }
+
 
 
     return false;

@@ -291,6 +291,13 @@ void GenerateVMPoolMemoryReferences(VMPool *pool, int size1, int size2) {
          }
       }
       delete[] arr;
+
+
+    if(pool->is_legitimate((unsigned long) arr) == true) {
+        TestFailed();
+      }
+
+
    }
 }
 

@@ -76,40 +76,6 @@ PageTable::PageTable()
 	
 	
    Console::puts("Constructed Page Table object\n");
-    // // frames * (bytes / frames) = bytes (address)
-    // unsigned long startAddress = process_mem_pool->get_frames(1) * PAGE_SIZE;
-    // page_directory = (unsigned long*) startAddress;
-
-
-    // // page table
-    // unsigned long startAddress2 = process_mem_pool->get_frames(1) * PAGE_SIZE;
-    // unsigned long* page_table = ( unsigned long* ) ( startAddress2 );
-
-    // // first 4MB directly mapped
-    // unsigned long address = 0;
-    // for(unsigned int i = 0; i < 1024; i++) {
-    //     page_table[i] = address | 0b011;
-    //     address += 4096;
-    // }
-
-    // // recursive
-    // page_table[1023] = (unsigned long) page_table;
-
-    // // connect page directory and page table
-    // page_directory[0] = (unsigned long) page_table;
-    // page_directory[0] |= 0b011;
-
-
-    // // populate page directory
-    // for(unsigned int i = 0; i < 1023; i++) {
-    //     page_directory[i] = 0 | 0b010; // supervisor, read & write, NOT present
-    // }
-
-    // // recursive page look up
-    // page_directory[1023] = (startAddress) | 0b011; // supervisor, read & write, present
-
-
-    Console::puts("Constructed Page Table object\n");
 }
 
 
@@ -139,12 +105,9 @@ void PageTable::enable_paging()
 
 void PageTable::handle_fault(REGS * _r)
 {
-
-
     // Console::puts("handling fault now...");
     // get faulting address
     unsigned long address32 = read_cr2();
-
 
     // check if address is legitimate
     bool legit = false;
@@ -221,7 +184,6 @@ void PageTable::register_pool(VMPool * _vm_pool)
 
 void PageTable::free_page(unsigned long _page_no) {
 
-
     //----- check if is page valid ------
     // parse address 32
     unsigned long address32 = _page_no;
@@ -241,7 +203,6 @@ void PageTable::free_page(unsigned long _page_no) {
         return;
     }
 
-
     // check if page table entry VALID
     unsigned long* pgTableEntryAddr = current_page_table->PTE_address(pgDirIndex, pgTableIndex);
     unsigned long pgTableEntry = *pgTableEntryAddr;
@@ -253,8 +214,7 @@ void PageTable::free_page(unsigned long _page_no) {
         return;
     }
 
-
-    // free page
+    // --- free page ---
     unsigned long frameNumber = pgTableEntry >> 12;
     process_mem_pool->release_frames(frameNumber);
 
