@@ -55,8 +55,24 @@
 /*--------------------------------------------------------------------------*/
 
 class Scheduler {
-
   /* The scheduler may need private members... */
+
+   // ready queue linked list
+   Thread* head;
+   Thread* tail; 
+
+
+   // threads
+   Thread* curr_thread;
+   Thread* idle_thread;
+
+
+   static Scheduler* curr_scheduler;
+
+
+   static void idle_function() {
+      for(;;) curr_scheduler->yield();
+   }
   
 public:
 
@@ -67,6 +83,7 @@ public:
 
    /* NOTE: We are making all functions virtual. This may come in handy when
             you want to derive RRScheduler from this class. */
+
   
    virtual void yield();
    /* Called by the currently running thread in order to give up the CPU. 

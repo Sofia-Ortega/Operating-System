@@ -44,22 +44,69 @@
 /*--------------------------------------------------------------------------*/
 /* METHODS FOR CLASS   S c h e d u l e r  */
 /*--------------------------------------------------------------------------*/
+Scheduler* Scheduler::curr_scheduler = nullptr;
 
 Scheduler::Scheduler() {
-  assert(false);
+
+   /*
+   initialize: 
+      - ready queue
+      - end of of quantum handler (eventually w RR)
+      - idle thread
+      - pointer to curr running thread
+   
+   */
+
+
+  // idle thread
+  char* stack_idle = new char[1024];
+  idle_thread = new Thread(idle_function, stack_idle, 1024);
+  curr_thread = idle_thread;
+
+
+  // ready queue
+  head = idle_thread;
+  tail = idle_thread;
+
+  // curr scheduler
+  curr_scheduler = this; // FIXME: if running multiple schedulers
+
   Console::puts("Constructed Scheduler.\n");
 }
 
 void Scheduler::yield() {
-  assert(false);
+  
+  // temp var for old curr thread
+  Thread* old_thread = curr_thread;
+
+  // add to the back of the queue
+  Thread* new_head = head->next;
+  tail->next = head;
+  tail = tail->next;
+  tail->next = nullptr;
+  head = new_head;
+
+  // update curr thread 
+  curr_thread = head;
+
+  // context switch
+  old_thread->dispatch_to(head);
+
+  Console::puts("Yielded\n");
+
 }
 
 void Scheduler::resume(Thread * _thread) {
-  assert(false);
+  tail->next = _thread;
+  tail = tail->next;
+  
 }
 
 void Scheduler::add(Thread * _thread) {
-  assert(false);
+  tail->next = _thread;
+  tail = tail->next;
+
+  Console::puts("Added thread");
 }
 
 void Scheduler::terminate(Thread * _thread) {

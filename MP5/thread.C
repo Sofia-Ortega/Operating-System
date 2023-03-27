@@ -72,6 +72,7 @@ static void thread_shutdown() {
        It terminates the thread by releasing memory and any other resources held by the thread. 
        This is a bit complicated because the thread termination interacts with the scheduler.
      */
+    Console::puts("Shutting down Thread "); Console::puti(Thread::CurrentThread()->ThreadId()); Console::puts("\n");
 
     assert(false);
     /* Let's not worry about it for now. 
@@ -181,6 +182,9 @@ Thread::Thread(Thread_Function _tf, char * _stack, unsigned int _stack_size) {
     /* -- INITIALIZE THE STACK OF THE THREAD */
 
     setup_context(_tf);
+
+    // initialize next for LL queue in Scheduler
+    next = nullptr;
 
 }
 

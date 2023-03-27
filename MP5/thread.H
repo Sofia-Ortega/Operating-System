@@ -65,6 +65,9 @@ private:
     */
  
 public: 
+   
+    Thread* next; //for the linked list queue in the Scheduler
+
     Thread(Thread_Function _tf, char * _stack, unsigned int _stack_size);
     /* Create a thread that is set up to execute the given thread function. 
        The thread is given a pointer to the stack to use. 
