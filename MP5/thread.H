@@ -56,6 +56,7 @@ private:
 
     static int nextFreePid; /* Used to assign unique id's to threads. */
 
+
     void push(unsigned long _val);
     /* Push the given value on the stack of the thread. */
 
@@ -67,6 +68,8 @@ private:
 public: 
    
     Thread* next; //for the linked list queue in the Scheduler
+    bool terminated;
+
 
     Thread(Thread_Function _tf, char * _stack, unsigned int _stack_size);
     /* Create a thread that is set up to execute the given thread function. 

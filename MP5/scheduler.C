@@ -79,18 +79,27 @@ void Scheduler::yield() {
   // temp var for old curr thread
   Thread* old_thread = curr_thread;
 
-  // add to the back of the queue
+  // find new head
   Thread* new_head = head->next;
+  while(new_head->terminated) {
+    new_head = new_head->next;
+  }
+
+  // add old head to the back of the queue
   tail->next = head;
   tail = tail->next;
   tail->next = nullptr;
+
+  // start queue in correct place
   head = new_head;
 
   // update curr thread 
   curr_thread = head;
 
+
   // context switch
   old_thread->dispatch_to(head);
+
 
   Console::puts("Yielded\n");
 
@@ -110,5 +119,28 @@ void Scheduler::add(Thread * _thread) {
 }
 
 void Scheduler::terminate(Thread * _thread) {
-  assert(false);
+  Console::puts("Terminating Thread "); Console::puti(_thread->ThreadId()); Console::puts("\n");
+
+  if(_thread == head) {
+    head = head->next;
+  }
+
+  Thread* prev = head;
+  Thread* curr = head->next;
+
+  while(curr != nullptr && curr != _thread) {
+    curr = curr->next;
+    prev = prev->next;
+  }
+
+
+  if (curr == nullptr) {
+    Console::puts("Terminating Thread not found in the queue");
+    assert(false);
+  }
+
+  // repoint 
+  prev = curr->next;
+
+
 }

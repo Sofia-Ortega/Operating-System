@@ -37,6 +37,7 @@
 
 #include "threads_low.H"
 
+#include "scheduler.H" // FIXME
 /*--------------------------------------------------------------------------*/
 /* EXTERNS */
 /*--------------------------------------------------------------------------*/
@@ -51,6 +52,7 @@ Thread * current_thread = 0;
 
 int Thread::nextFreePid;
 
+
 /* -------------------------------------------------------------------------*/
 /* LOCAL FUNCTIONS */
 /* -------------------------------------------------------------------------*/
@@ -60,7 +62,7 @@ int Thread::nextFreePid;
 
 inline void Thread::push(unsigned long _val) {
     /* This function is originally borrowed from David H. Hovemeyer <daveho@cs.umd.edu> */
-    esp -= 4;
+    esp -= 4; // 4 bytes = 32 bitsz
     *((unsigned long *) esp) = _val;
 }
 
@@ -73,6 +75,23 @@ static void thread_shutdown() {
        This is a bit complicated because the thread termination interacts with the scheduler.
      */
     Console::puts("Shutting down Thread "); Console::puti(Thread::CurrentThread()->ThreadId()); Console::puts("\n");
+    Thread* curr_thread = Thread::CurrentThread();
+
+    
+
+
+    Thread* new_thread = current_thread->next;
+    curr_thread->terminated = true;
+
+
+    // delete stack;
+
+
+
+    
+
+    
+
 
     assert(false);
     /* Let's not worry about it for now. 
@@ -164,6 +183,7 @@ Thread::Thread(Thread_Function _tf, char * _stack, unsigned int _stack_size) {
 /* Construct a new thread and initialize its stack. The thread is then ready to run.
    (The dispatcher is implemented in file "thread_scheduler".) 
 */
+    terminated = false;
 
     /* -- INITIALIZE THREAD */
 
