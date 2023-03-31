@@ -37,7 +37,9 @@
 
 #include "threads_low.H"
 
-#include "scheduler.H" // FIXME
+#include "common.H"
+
+
 /*--------------------------------------------------------------------------*/
 /* EXTERNS */
 /*--------------------------------------------------------------------------*/
@@ -66,16 +68,6 @@ inline void Thread::push(unsigned long _val) {
     *((unsigned long *) esp) = _val;
 }
 
-inline bool Thread::pop() {
-    if (esp + 4 > stack) {
-        return false;
-    }
-
-    esp += 4;
-    return true;
-
-}
-
 /* -------------------------------------------------------------------------*/
 /* LOCAL FUNCTIONS TO START/SHUTDOWN THREADS. */
 
@@ -87,29 +79,11 @@ static void thread_shutdown() {
     Console::puts("Shutting down Thread "); Console::puti(Thread::CurrentThread()->ThreadId()); Console::puts("\n");
     Thread* my_thread = Thread::CurrentThread();
 
-    
-
-
     Thread* new_thread = my_thread->next;
     my_thread->terminated = true; // mark as terminated
 
+    SYSTEM_SCHEDULER->yield();
 
-    // delete stack;
-    while(my_thread->pop()) {}
-
-
-    current_thread = new_thread;
-
-
-    
-
-    
-
-
-    assert(false);
-    /* Let's not worry about it for now. 
-       This means that we should have non-terminating thread functions. 
-    */
 }
 
 static void thread_start() {

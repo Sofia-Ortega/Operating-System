@@ -86,10 +86,13 @@ void Scheduler::yield() {
   }
 
   // add old head to the back of the queue
-  tail->next = head;
-  tail = tail->next;
-  tail->next = nullptr;
+  if(!old_thread->terminated) {
+    tail->next = head;
+    tail = tail->next;
+  }
 
+  tail->next = nullptr;
+  
   // start queue in correct place
   head = new_head;
 

@@ -58,6 +58,8 @@
 
 #include "thread.H"          /* THREAD MANAGEMENT */
 
+#include "common.H"
+
 #ifdef _USES_SCHEDULER_
 #include "scheduler.H"
 #endif
@@ -104,6 +106,7 @@ void operator delete[] (void * p) {
 
 /* -- A POINTER TO THE SYSTEM SCHEDULER */
 Scheduler * SYSTEM_SCHEDULER;
+// SYSTEM_SCHEDULER;
 
 #endif
 
