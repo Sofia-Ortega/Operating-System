@@ -60,6 +60,7 @@ private:
     void push(unsigned long _val);
     /* Push the given value on the stack of the thread. */
 
+
     void setup_context(Thread_Function _tfunction);
     /* Sets up the initial context for the given kernel-only thread. 
        The thread is supposed the call the function _tfunction upon start.
@@ -70,6 +71,7 @@ public:
     Thread* next; //for the linked list queue in the Scheduler
     bool terminated;
 
+    bool pop();
 
     Thread(Thread_Function _tf, char * _stack, unsigned int _stack_size);
     /* Create a thread that is set up to execute the given thread function. 

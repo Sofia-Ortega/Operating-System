@@ -306,7 +306,6 @@ int main() {
     SYSTEM_SCHEDULER->add(thread3);
     SYSTEM_SCHEDULER->add(thread4);
 
-    Thread::scheduler = SYSTEM_SCHEDULER;
 #endif
 
     /* -- KICK-OFF THREAD1 ... */

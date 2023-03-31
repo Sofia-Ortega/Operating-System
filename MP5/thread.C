@@ -66,6 +66,16 @@ inline void Thread::push(unsigned long _val) {
     *((unsigned long *) esp) = _val;
 }
 
+inline bool Thread::pop() {
+    if (esp + 4 > stack) {
+        return false;
+    }
+
+    esp += 4;
+    return true;
+
+}
+
 /* -------------------------------------------------------------------------*/
 /* LOCAL FUNCTIONS TO START/SHUTDOWN THREADS. */
 
@@ -75,17 +85,20 @@ static void thread_shutdown() {
        This is a bit complicated because the thread termination interacts with the scheduler.
      */
     Console::puts("Shutting down Thread "); Console::puti(Thread::CurrentThread()->ThreadId()); Console::puts("\n");
-    Thread* curr_thread = Thread::CurrentThread();
+    Thread* my_thread = Thread::CurrentThread();
 
     
 
 
-    Thread* new_thread = current_thread->next;
-    curr_thread->terminated = true;
+    Thread* new_thread = my_thread->next;
+    my_thread->terminated = true; // mark as terminated
 
 
     // delete stack;
+    while(my_thread->pop()) {}
 
+
+    current_thread = new_thread;
 
 
     
