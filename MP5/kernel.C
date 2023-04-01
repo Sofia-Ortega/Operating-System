@@ -106,7 +106,6 @@ void operator delete[] (void * p) {
 
 /* -- A POINTER TO THE SYSTEM SCHEDULER */
 Scheduler * SYSTEM_SCHEDULER;
-// SYSTEM_SCHEDULER;
 
 #endif
 
@@ -146,13 +145,13 @@ void fun1() {
     Console::puts("FUN 1 INVOKED!\n");
 
 #ifdef _TERMINATING_FUNCTIONS_
-    for(int j = 0; j < 10; j++) 
+    for(int j = 0; j < 5; j++) 
 #else
     for(int j = 0;; j++) 
 #endif
     {	
         Console::puts("FUN 1 IN BURST["); Console::puti(j); Console::puts("]\n");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0;; i++) {
             Console::puts("FUN 1: TICK ["); Console::puti(i); Console::puts("]\n");
         }
         pass_on_CPU(thread2);
@@ -165,13 +164,13 @@ void fun2() {
     Console::puts("FUN 2 INVOKED!\n");
 
 #ifdef _TERMINATING_FUNCTIONS_
-    for(int j = 0; j < 10; j++) 
+    for(int j = 0; j < 2; j++) 
 #else
     for(int j = 0;; j++) 
 #endif  
     {		
         Console::puts("FUN 2 IN BURST["); Console::puti(j); Console::puts("]\n");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 2; i++) {
             Console::puts("FUN 2: TICK ["); Console::puti(i); Console::puts("]\n");
         }
         pass_on_CPU(thread3);
@@ -182,9 +181,9 @@ void fun3() {
     Console::puts("Thread: "); Console::puti(Thread::CurrentThread()->ThreadId()); Console::puts("\n");
     Console::puts("FUN 3 INVOKED!\n");
 
-    for(int j = 0;; j++) {
+    for(int j = 0; j < 8; j++) {
         Console::puts("FUN 3 IN BURST["); Console::puti(j); Console::puts("]\n");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 2; i++) {
 	    Console::puts("FUN 3: TICK ["); Console::puti(i); Console::puts("]\n");
         }
         pass_on_CPU(thread4);
@@ -195,9 +194,9 @@ void fun4() {
     Console::puts("Thread: "); Console::puti(Thread::CurrentThread()->ThreadId()); Console::puts("\n");
     Console::puts("FUN 4 INVOKED!\n");
 
-    for(int j = 0;; j++) {
+    for(int j = 0; j < 2; j++) {
         Console::puts("FUN 4 IN BURST["); Console::puti(j); Console::puts("]\n");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 4; i++) {
 	    Console::puts("FUN 4: TICK ["); Console::puti(i); Console::puts("]\n");
         }
         pass_on_CPU(thread1);
@@ -300,6 +299,8 @@ int main() {
     char * stack4 = new char[1024];
     thread4 = new Thread(fun4, stack4, 1024);
     Console::puts("DONE\n");
+
+
 
 #ifdef _USES_SCHEDULER_
 

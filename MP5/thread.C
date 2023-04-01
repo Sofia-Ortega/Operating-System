@@ -30,6 +30,7 @@
 
 #include "assert.H"
 #include "console.H"
+#include "machine_low.H"
 
 #include "frame_pool.H"
 
@@ -90,6 +91,7 @@ static void thread_start() {
      /* This function is used to release the thread for execution in the ready queue. */
     
      /* We need to add code, but it is probably nothing more than enabling interrupts. */
+     Machine::enable_interrupts();
 }
 
 void Thread::setup_context(Thread_Function _tfunction){
@@ -125,7 +127,7 @@ void Thread::setup_context(Thread_Function _tfunction){
     /* ---- EFLAGS */
     push(0);
     /* Clear the IF bit to disable interrupts when thread starts. */
-
+    
     /* ---- CS and EIP REGISTERS */
     push(Machine::KERNEL_CS);
     push((unsigned long) &thread_start);
@@ -157,8 +159,7 @@ void Thread::setup_context(Thread_Function _tfunction){
     push(0);  /* fs */
     push(0);  /* gs */
 
-    Console::puts("esp = "); Console::putui((unsigned int)esp); Console::puts("\n");
-
+    // Console::puts("esp = "); Console::putui((unsigned int)esp); Console::puts("\n");
     Console::puts("done\n");
 }
 
@@ -209,7 +210,7 @@ void Thread::dispatch_to(Thread * _thread) {
 */
 
     /* The value of 'current_thread' is modified inside 'threads_low_switch_to()'. */
-
+    
     threads_low_switch_to(_thread);
 
     /* The call does not return until after the thread is context-switched back in. */
