@@ -69,7 +69,7 @@ Scheduler::Scheduler() {
   tail = idle_thread;
 
   // curr scheduler
-  curr_scheduler = this; // FIXME: if running multiple schedulers
+  curr_scheduler = this; 
 
   Console::puts("Constructed Scheduler.\n");
 }

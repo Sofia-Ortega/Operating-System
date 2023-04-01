@@ -151,7 +151,7 @@ void fun1() {
 #endif
     {	
         Console::puts("FUN 1 IN BURST["); Console::puti(j); Console::puts("]\n");
-        for (int i = 0;; i++) {
+        for (int i = 0 ;; i++) {
             Console::puts("FUN 1: TICK ["); Console::puti(i); Console::puts("]\n");
         }
         pass_on_CPU(thread2);
