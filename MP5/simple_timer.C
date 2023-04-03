@@ -24,6 +24,9 @@
 #include "console.H"
 #include "interrupts.H"
 #include "simple_timer.H"
+#include "machine.H"
+
+#include "common.H"
 
 /*--------------------------------------------------------------------------*/
 /* CONSTRUCTOR */
@@ -62,8 +65,16 @@ void SimpleTimer::handle_interrupt(REGS *_r) {
     {
         seconds++;
         ticks = 0;
-        Console::puts(" == One second has passed == \n");
+        Console::puts(" ================== One second has passed ================= \n");
+        Console::putui(seconds);
+        Console::puts("\n\n");
+
+       SYSTEM_SCHEDULER->yield();
+
         assert(false);
+    //    if(seconds > 1) assert(false);
+        
+    
     }
 }
 
@@ -84,6 +95,7 @@ void SimpleTimer::current(unsigned long * _seconds, int * _ticks) {
 
   *_seconds = seconds;
   *_ticks   = ticks;
+
 }
 
 void SimpleTimer::wait(unsigned long _seconds) {
@@ -93,6 +105,7 @@ void SimpleTimer::wait(unsigned long _seconds) {
     int           now_ticks;
     current(&now_seconds, &now_ticks);
 
+    Console::puts("wait\n");
     unsigned long then_seconds = now_seconds + _seconds;
 
     while((seconds <= then_seconds) && (ticks < now_ticks));

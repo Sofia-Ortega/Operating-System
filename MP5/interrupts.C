@@ -128,6 +128,9 @@ void InterruptHandler::dispatch_interrupt(REGS * _r) {
   }
   else {
     /* -- HANDLE THE INTERRUPT */
+    Console::puts("INTERRUPT NO: ");
+    Console::puti(int_no);
+    Console::puts("\n");
     handler->handle_interrupt(_r);
   }
 

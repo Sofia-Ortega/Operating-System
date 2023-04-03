@@ -33,7 +33,7 @@
 
 /* -- UNCOMMENT THE FOLLOWING LINE TO MAKE THREADS TERMINATING */
 
-#define _TERMINATING_FUNCTIONS_
+// #define _TERMINATING_FUNCTIONS_
 /* This macro is defined when we want the thread functions to return, and so
    terminate their thread.
    Otherwise, the thread functions don't return, and the threads run forever.
@@ -170,7 +170,7 @@ void fun2() {
 #endif  
     {		
         Console::puts("FUN 2 IN BURST["); Console::puti(j); Console::puts("]\n");
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0;; i++) {
             Console::puts("FUN 2: TICK ["); Console::puti(i); Console::puts("]\n");
         }
         pass_on_CPU(thread3);
@@ -183,7 +183,7 @@ void fun3() {
 
     for(int j = 0; j < 8; j++) {
         Console::puts("FUN 3 IN BURST["); Console::puti(j); Console::puts("]\n");
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0;; i++) {
 	    Console::puts("FUN 3: TICK ["); Console::puti(i); Console::puts("]\n");
         }
         pass_on_CPU(thread4);
@@ -196,7 +196,7 @@ void fun4() {
 
     for(int j = 0; j < 2; j++) {
         Console::puts("FUN 4 IN BURST["); Console::puti(j); Console::puts("]\n");
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0;; i++) {
 	    Console::puts("FUN 4: TICK ["); Console::puti(i); Console::puts("]\n");
         }
         pass_on_CPU(thread1);
@@ -315,6 +315,7 @@ int main() {
     /* -- KICK-OFF THREAD1 ... */
 
     Console::puts("STARTING THREAD 1 ...\n");
+    thread1->startTimer();
     Thread::dispatch_to(thread1);
 
     /* -- AND ALL THE REST SHOULD FOLLOW ... */

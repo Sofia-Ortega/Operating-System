@@ -28,6 +28,7 @@
 /*--------------------------------------------------------------------------*/
 
 #include "machine.H"
+#include "simple_timer.H"
 
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */
@@ -53,6 +54,8 @@ private:
     char     * cargo;       /* pointer to additional data that 
                                may need to be stored, typically by schedulers.
                                (for future use) */
+
+   SimpleTimer* timer;
 
     static int nextFreePid; /* Used to assign unique id's to threads. */
 
@@ -91,6 +94,10 @@ public:
     static Thread * CurrentThread();
     /* Returns the currently running thread. NULL if no thread has started 
        yet. */
+
+
+   void startTimer();
+   void endTimer();
 };
 
 #endif

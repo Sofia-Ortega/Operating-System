@@ -76,6 +76,8 @@ Scheduler::Scheduler() {
 
 void Scheduler::yield() {
   
+  Machine::disable_interrupts();
+
   // temp var for old curr thread
   Thread* old_thread = curr_thread;
 
@@ -99,6 +101,7 @@ void Scheduler::yield() {
   // update curr thread 
   curr_thread = head;
 
+  // curr_thread->startTimer();
 
   // context switch
   old_thread->dispatch_to(head);
@@ -106,22 +109,37 @@ void Scheduler::yield() {
 
   Console::puts("Yielded\n");
 
+  Machine::enable_interrupts();
+
 }
 
 void Scheduler::resume(Thread * _thread) {
+  Machine::disable_interrupts();
+
   tail->next = _thread;
   tail = tail->next;
+
+  Machine::enable_interrupts();
   
 }
 
 void Scheduler::add(Thread * _thread) {
+  Machine::disable_interrupts();
+
   tail->next = _thread;
   tail = tail->next;
 
   Console::puts("Added thread");
+
+  Machine::enable_interrupts();
 }
 
 void Scheduler::terminate(Thread * _thread) {
+
+
+  // once start terminating, want to finish
+  Machine::disable_interrupts();
+
   Console::puts("Terminating Thread "); Console::puti(_thread->ThreadId()); Console::puts("\n");
 
   if(_thread == head) {
@@ -144,6 +162,9 @@ void Scheduler::terminate(Thread * _thread) {
 
   // repoint 
   prev = curr->next;
+
+  // once finish terminating, want to finish
+  Machine::enable_interrupts();
 
 
 }

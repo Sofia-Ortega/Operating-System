@@ -29,13 +29,13 @@ bool Machine::interrupts_enabled() {
 }
 
 void Machine::enable_interrupts() {
-  assert(!interrupts_enabled());
+  if(interrupts_enabled()) return;
   Console::puts("Enabled!!!!!!!!!!!\n");
   __asm__ __volatile__ ("sti");
 }
 
 void Machine::disable_interrupts() {
-  assert(interrupts_enabled());
+  if(!interrupts_enabled()) return;
   Console::puts("DISable----------\n");
   __asm__ __volatile__ ("cli");
 }
