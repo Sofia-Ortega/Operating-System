@@ -69,11 +69,8 @@ void SimpleTimer::handle_interrupt(REGS *_r) {
         Console::putui(seconds);
         Console::puts("\n\n");
 
-       SYSTEM_SCHEDULER->yield();
-
         assert(false);
-    //    if(seconds > 1) assert(false);
-        
+
     
     }
 }

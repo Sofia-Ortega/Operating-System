@@ -79,12 +79,14 @@ static void thread_shutdown() {
        It terminates the thread by releasing memory and any other resources held by the thread. 
        This is a bit complicated because the thread termination interacts with the scheduler.
      */
+
+    Machine::disable_interrupts();
     Console::puts("Shutting down Thread "); Console::puti(Thread::CurrentThread()->ThreadId()); Console::puts("\n");
     Thread* my_thread = Thread::CurrentThread();
 
-    Thread* new_thread = my_thread->next;
     my_thread->terminated = true; // mark as terminated
 
+    Machine::enable_interrupts();
     SYSTEM_SCHEDULER->yield();
 
 }
@@ -95,26 +97,6 @@ static void thread_start() {
      /* We need to add code, but it is probably nothing more than enabling interrupts. */
      Machine::enable_interrupts();
 }
-
-void Thread::startTimer() {
-    Machine::disable_interrupts();
-
-    if (thread_id == 0) return;
-
-    timer = new SimpleTimer(100);
-    InterruptHandler::register_handler(thread_id, timer);
-
-    if (thread_id == 2) 
-    {
-        timer->wait(4);
-        assert(false);
-
-    }
-
-    Machine::enable_interrupts();
-
-}
-
 
 
 void Thread::setup_context(Thread_Function _tfunction){
@@ -233,8 +215,6 @@ void Thread::dispatch_to(Thread * _thread) {
 */
 
     /* The value of 'current_thread' is modified inside 'threads_low_switch_to()'. */
-
-    _thread->startTimer();
     
     threads_low_switch_to(_thread);
 

@@ -55,8 +55,6 @@ private:
                                may need to be stored, typically by schedulers.
                                (for future use) */
 
-   SimpleTimer* timer;
-
     static int nextFreePid; /* Used to assign unique id's to threads. */
 
 
@@ -95,9 +93,6 @@ public:
     /* Returns the currently running thread. NULL if no thread has started 
        yet. */
 
-
-   void startTimer();
-   void endTimer();
 };
 
 #endif

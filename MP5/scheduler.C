@@ -136,11 +136,12 @@ void Scheduler::add(Thread * _thread) {
 
 void Scheduler::terminate(Thread * _thread) {
 
-
   // once start terminating, want to finish
   Machine::disable_interrupts();
 
-  Console::puts("Terminating Thread "); Console::puti(_thread->ThreadId()); Console::puts("\n");
+  Console::puts("Terminating Thread ");
+  Console::puti(_thread->ThreadId()); 
+  Console::puts("\n");
 
   if(_thread == head) {
     head = head->next;
