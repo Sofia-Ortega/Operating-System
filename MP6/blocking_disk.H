@@ -22,6 +22,7 @@
 /*--------------------------------------------------------------------------*/
 
 #include "simple_disk.H"
+#include "thread.H"
 
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */ 
@@ -34,6 +35,20 @@
 /*--------------------------------------------------------------------------*/
 
 class BlockingDisk : public SimpleDisk {
+
+private:
+
+   // blocked thread queue
+   static BlockingDisk* blockedQueue;
+   static BlockingDisk* tail;
+
+   // members for queue
+   BlockingDisk* next;
+   Thread* thread; // one thread per disk 
+
+   void push_queue();
+   BlockingDisk* pop_queue();
+
 public:
    BlockingDisk(DISK_ID _disk_id, unsigned int _size); 
    /* Creates a BlockingDisk device with the given size connected to the 
@@ -47,6 +62,10 @@ public:
    virtual void read(unsigned long _block_no, unsigned char * _buf);
    /* Reads 512 Bytes from the given block of the disk and copies them 
       to the given buffer. No error check! */
+
+      // queue up and read 
+      // each time thread resumes execution -> check disk queue status
+      // if possible complete thingy
 
    virtual void write(unsigned long _block_no, unsigned char * _buf);
    /* Writes 512 Bytes from the buffer to the given block on the disk. */
