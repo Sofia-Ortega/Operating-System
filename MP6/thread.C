@@ -29,7 +29,6 @@
 /*--------------------------------------------------------------------------*/
 
 #include "assert.H"
-#include "utils.H"
 #include "console.H"
 
 #include "frame_pool.H"
@@ -37,6 +36,9 @@
 #include "thread.H"
 
 #include "threads_low.H"
+
+#include "common.H"
+
 
 /*--------------------------------------------------------------------------*/
 /* EXTERNS */
@@ -52,6 +54,7 @@ Thread * current_thread = 0;
 
 int Thread::nextFreePid;
 
+
 /* -------------------------------------------------------------------------*/
 /* LOCAL FUNCTIONS */
 /* -------------------------------------------------------------------------*/
@@ -61,7 +64,7 @@ int Thread::nextFreePid;
 
 inline void Thread::push(unsigned long _val) {
     /* This function is originally borrowed from David H. Hovemeyer <daveho@cs.umd.edu> */
-    esp -= 4;
+    esp -= 4; // 4 bytes = 32 bitsz
     *((unsigned long *) esp) = _val;
 }
 
@@ -73,11 +76,14 @@ static void thread_shutdown() {
        It terminates the thread by releasing memory and any other resources held by the thread. 
        This is a bit complicated because the thread termination interacts with the scheduler.
      */
+    Console::puts("Shutting down Thread "); Console::puti(Thread::CurrentThread()->ThreadId()); Console::puts("\n");
+    Thread* my_thread = Thread::CurrentThread();
 
-    assert(false);
-    /* Let's not worry about it for now. 
-       This means that we should have non-terminating thread functions. 
-    */
+    Thread* new_thread = my_thread->next;
+    my_thread->terminated = true; // mark as terminated
+
+    SYSTEM_SCHEDULER->yield();
+
 }
 
 static void thread_start() {
@@ -164,6 +170,7 @@ Thread::Thread(Thread_Function _tf, char * _stack, unsigned int _stack_size) {
 /* Construct a new thread and initialize its stack. The thread is then ready to run.
    (The dispatcher is implemented in file "thread_scheduler".) 
 */
+    terminated = false;
 
     /* -- INITIALIZE THREAD */
 
@@ -182,6 +189,9 @@ Thread::Thread(Thread_Function _tf, char * _stack, unsigned int _stack_size) {
     /* -- INITIALIZE THE STACK OF THE THREAD */
 
     setup_context(_tf);
+
+    // initialize next for LL queue in Scheduler
+    next = nullptr;
 
 }
 

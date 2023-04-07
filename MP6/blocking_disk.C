@@ -28,6 +28,7 @@
 /* CONSTRUCTOR */
 /*--------------------------------------------------------------------------*/
 BlockingDisk* BlockingDisk::blockedQueue = nullptr;
+BlockingDisk* BlockingDisk::tail = nullptr;
 
 void BlockingDisk::push_queue() {
   if (blockedQueue == nullptr) {
