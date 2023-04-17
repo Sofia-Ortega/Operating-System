@@ -68,6 +68,9 @@ Scheduler::Scheduler() {
   head = idle_thread;
   tail = idle_thread;
 
+  diskHead = nullptr;
+  diskTail = nullptr;
+
   // curr scheduler
   curr_scheduler = this; // FIXME: if running multiple schedulers
 
@@ -75,16 +78,6 @@ Scheduler::Scheduler() {
 }
 
 
-void Scheduler::addToReadyQueue(Thread* thread) {
-  Thread* new_head = head->next;
-  while(new_head->terminated) {
-    new_head = new_head->next;
-  }
-
-  // add old head to the back of the queue
-  // ?????
-
-}
 
 void Scheduler::yield() {
   
@@ -135,13 +128,13 @@ void Scheduler::yieldDisk() {
   // have thread cut in line with rest of disk queues
 
   curr_thread->disk = true;
-  Thread* temp_thread = curr_thread;
 
   // will never be terminated if just yielding in disk
 
 
   // add to disk queue
   if(diskHead == nullptr) {
+    Console::puts("a;lskdjfa;lskjdf;laksjdf;lk");
     diskHead = curr_thread;
     diskTail = curr_thread;
     curr_thread->next = nullptr;
@@ -158,17 +151,35 @@ void Scheduler::yieldDisk() {
     diskTail = curr_thread;
   }
 
+  Console::puts("yielded in disk queue \n");
+  printDiskQueue();
+
 
   yield();
 
+}
 
+void Scheduler::printQueue() {
+  Thread* curr = head;
+  Console::puts("\n\nQueue: ");
+  while(curr != nullptr) {
+    Console::puts("[ Thread "); Console::putui(curr->ThreadId()); Console::puts("] ->");
+    curr = curr->next;
+  }
+  Console::puts("\n");
+}
 
-
-
-
-
+void Scheduler::printDiskQueue() {
+  Thread* curr = diskHead;
+  Console::puts("\n\nDISK Queue: ");
+  while(curr != diskTail->next) {
+    Console::puts("[ Thread "); Console::putui(curr->ThreadId()); Console::puts("] ->");
+    curr = curr->next;
+  }
+  Console::puts("\n");
 
 }
+
 
 void Scheduler::resume(Thread * _thread) {
   tail->next = _thread;

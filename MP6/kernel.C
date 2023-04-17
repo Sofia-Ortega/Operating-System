@@ -261,6 +261,8 @@ void fun5() {
        write_block = read_block;
        read_block  = (read_block + 1) % 10;
 
+        SYSTEM_SCHEDULER->printQueue();
+        SYSTEM_SCHEDULER->printDiskQueue();
        /* -- Give up the CPU */
        pass_on_CPU(thread1);
     }

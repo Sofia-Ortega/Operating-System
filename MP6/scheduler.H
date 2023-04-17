@@ -82,6 +82,8 @@ class Scheduler {
    void addToReadyQueue(Thread* thread);
   
 public:
+   void printQueue();
+   void printDiskQueue();
 
    Scheduler();
    /* Setup the scheduler. This sets up the ready queue, for example.

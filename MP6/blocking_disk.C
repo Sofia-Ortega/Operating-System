@@ -78,8 +78,8 @@ void BlockingDisk::read(unsigned long _block_no, unsigned char * _buf) {
   if (!is_ready()) {
     bool disk = true;
     Console::puts("\nNOT ready\n");
-    SYSTEM_SCHEDULER->yield();
-    // SYSTEM_SCHEDULER->yieldDisk();
+    // SYSTEM_SCHEDULER->yield();
+    SYSTEM_SCHEDULER->yieldDisk();
   }
 
     Console::puts("\nready it IS\n");
