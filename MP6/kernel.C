@@ -133,7 +133,7 @@ void pass_on_CPU(Thread * _to_thread) {
            we pre-empt the current thread by putting it onto the ready
            queue and yielding the CPU. */
 
-        SYSTEM_SCHEDULER->resume(Thread::CurrentThread()); 
+        // SYSTEM_SCHEDULER->resume(Thread::CurrentThread()); 
         SYSTEM_SCHEDULER->yield();
 #endif
 }
@@ -370,7 +370,7 @@ int main() {
 
     Console::puts("CREATING THREAD 5...");
     char * stack5 = new char[1024];
-    thread4 = new Thread(fun5, stack4, 1024);
+    thread5 = new Thread(fun5, stack5, 1024);
     Console::puts("DONE\n");
 
 #ifdef _USES_SCHEDULER_
@@ -380,6 +380,9 @@ int main() {
     SYSTEM_SCHEDULER->add(thread2);
     SYSTEM_SCHEDULER->add(thread3);
     SYSTEM_SCHEDULER->add(thread4);
+    SYSTEM_SCHEDULER->add(thread5);
+
+    SYSTEM_SCHEDULER->printQueue();
 
 #endif
 

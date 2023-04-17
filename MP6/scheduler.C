@@ -120,6 +120,8 @@ void Scheduler::yield() {
   old_thread->dispatch_to(head);
 
 
+  printQueue();
+  printDiskQueue();
   Console::puts("Yielded\n");
 
 }
@@ -134,7 +136,6 @@ void Scheduler::yieldDisk() {
 
   // add to disk queue
   if(diskHead == nullptr) {
-    Console::puts("a;lskdjfa;lskjdf;laksjdf;lk");
     diskHead = curr_thread;
     diskTail = curr_thread;
     curr_thread->next = nullptr;
@@ -152,10 +153,13 @@ void Scheduler::yieldDisk() {
   }
 
   Console::puts("yielded in disk queue \n");
+  printQueue();
   printDiskQueue();
 
 
-  yield();
+  // FIXME: add terminated handling
+  curr_thread->dispatch_to(head);
+
 
 }
 
@@ -184,6 +188,7 @@ void Scheduler::printDiskQueue() {
 void Scheduler::resume(Thread * _thread) {
   tail->next = _thread;
   tail = tail->next;
+  tail->next = nullptr;
   
 }
 

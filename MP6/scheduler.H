@@ -79,7 +79,6 @@ class Scheduler {
       for(;;) curr_scheduler->yield();
    }
 
-   void addToReadyQueue(Thread* thread);
   
 public:
    void printQueue();
