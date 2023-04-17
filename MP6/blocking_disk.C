@@ -78,8 +78,8 @@ void BlockingDisk::read(unsigned long _block_no, unsigned char * _buf) {
   while (!is_ready()) {
     bool disk = true;
     Console::puts("\nNOT ready\n");
-    SYSTEM_SCHEDULER->yield();
-    // SYSTEM_SCHEDULER->yieldDisk();
+    // SYSTEM_SCHEDULER->yield();
+    SYSTEM_SCHEDULER->yieldDisk();
   }
 
     Console::puts("\nready it IS\n");
@@ -105,8 +105,8 @@ void BlockingDisk::write(unsigned long _block_no, unsigned char * _buf) {
   while(!is_ready()) {
     Console::puts("\nNOT wridy\n");
     bool disk = true;
-    SYSTEM_SCHEDULER->yield();
-    // SYSTEM_SCHEDULER->yieldDisk();
+    // SYSTEM_SCHEDULER->yield();
+    SYSTEM_SCHEDULER->yieldDisk();
   }
 
     Console::puts("\nwridy it IS\n");

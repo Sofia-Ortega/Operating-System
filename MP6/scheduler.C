@@ -128,14 +128,21 @@ void Scheduler::yield() {
 
 void Scheduler::yieldDisk() {
   // have thread cut in line with rest of disk queues
+  Console::puts("before disk yield");
+  printQueue();
+  printDiskQueue();
 
   curr_thread->disk = true;
 
-  // will never be terminated if just yielding in disk
+  // get next head
+  head = head->next;
+  while(head->terminated) head = head->next;
+
 
 
   // add to disk queue
   if(diskHead == nullptr) {
+    Console::puts("adding disk head as "); Console::putui(curr_thread->ThreadId()); Console::puts("\n");
     diskHead = curr_thread;
     diskTail = curr_thread;
     curr_thread->next = nullptr;
@@ -149,15 +156,22 @@ void Scheduler::yieldDisk() {
     // insert into ready queue
     curr_thread->next = diskTail->next;
     diskTail->next = curr_thread;
+
+    if(diskTail == tail) tail = curr_thread;
+    
     diskTail = curr_thread;
+
+
   }
+
+
 
   Console::puts("yielded in disk queue \n");
   printQueue();
   printDiskQueue();
 
 
-  // FIXME: add terminated handling
+  curr_thread = head;
   curr_thread->dispatch_to(head);
 
 
