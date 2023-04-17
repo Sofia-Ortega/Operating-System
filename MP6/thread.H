@@ -70,6 +70,7 @@ public:
    
     Thread* next; //for the linked list queue in the Scheduler
     bool terminated;
+    bool disk;
 
     Thread(Thread_Function _tf, char * _stack, unsigned int _stack_size);
     /* Create a thread that is set up to execute the given thread function. 

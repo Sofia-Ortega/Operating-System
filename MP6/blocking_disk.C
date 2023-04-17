@@ -72,13 +72,14 @@ BlockingDisk::BlockingDisk(DISK_ID _disk_id, unsigned int _size)
 /*--------------------------------------------------------------------------*/
 
 void BlockingDisk::read(unsigned long _block_no, unsigned char * _buf) {
-  // -- REPLACE THIS!!!
 
   issue_operation(DISK_OPERATION::READ, _block_no);
 
   if (!is_ready()) {
+    bool disk = true;
     Console::puts("\nNOT ready\n");
     SYSTEM_SCHEDULER->yield();
+    // SYSTEM_SCHEDULER->yieldDisk();
   }
 
     Console::puts("\nready it IS\n");
@@ -98,13 +99,14 @@ void BlockingDisk::read(unsigned long _block_no, unsigned char * _buf) {
 
 
 void BlockingDisk::write(unsigned long _block_no, unsigned char * _buf) {
-  // -- REPLACE THIS!!!
 
   issue_operation(DISK_OPERATION::WRITE, _block_no);
 
   if(!is_ready()) {
     Console::puts("\nNOT wridy\n");
-    SYSTEM_SCHEDULER->yield();
+    bool disk = true;
+    // SYSTEM_SCHEDULER->yield();
+    SYSTEM_SCHEDULER->yieldDisk();
   }
 
     Console::puts("\nwridy it IS\n");

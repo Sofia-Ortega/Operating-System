@@ -171,6 +171,7 @@ Thread::Thread(Thread_Function _tf, char * _stack, unsigned int _stack_size) {
    (The dispatcher is implemented in file "thread_scheduler".) 
 */
     terminated = false;
+    disk = false;
 
     /* -- INITIALIZE THREAD */
 

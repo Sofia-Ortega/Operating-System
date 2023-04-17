@@ -146,6 +146,7 @@ Thread * thread1;
 Thread * thread2;
 Thread * thread3;
 Thread * thread4;
+Thread * thread5;
 
 void fun1() {
     Console::puts("THREAD: "); Console::puti(Thread::CurrentThread()->ThreadId()); Console::puts("\n");
@@ -228,6 +229,39 @@ void fun4() {
            Console::puts("FUN 4: TICK ["); Console::puti(i); Console::puts("]\n");
        }
 
+       pass_on_CPU(thread5);
+    }
+}
+void fun5() {
+    Console::puts("THREAD: "); Console::puti(Thread::CurrentThread()->ThreadId()); Console::puts("\n");
+
+    Console::puts("FUN 5 INVOKED!\n");
+
+    unsigned char buf[DISK_BLOCK_SIZE];
+    int  read_block  = 1;
+    int  write_block = 0;
+
+    for(int j = 0;; j++) {
+
+       Console::puts("FUN 5 IN ITERATION["); Console::puti(j); Console::puts("]\n");
+
+       /* -- Read */
+       Console::puts("+5+ Reading a block from disk...\n");
+       SYSTEM_DISK->read(read_block, buf);
+
+       /* -- Display */
+       for (int i = 0; i < DISK_BLOCK_SIZE; i++) {
+           Console::putch(buf[i]);
+       }
+
+       Console::puts("+5+ Writing a block to disk...\n");
+       SYSTEM_DISK->write(write_block, buf); 
+
+       /* -- Move to next block */
+       write_block = read_block;
+       read_block  = (read_block + 1) % 10;
+
+       /* -- Give up the CPU */
        pass_on_CPU(thread1);
     }
 }
@@ -330,6 +364,11 @@ int main() {
     Console::puts("CREATING THREAD 4...");
     char * stack4 = new char[1024];
     thread4 = new Thread(fun4, stack4, 1024);
+    Console::puts("DONE\n");
+
+    Console::puts("CREATING THREAD 5...");
+    char * stack5 = new char[1024];
+    thread4 = new Thread(fun5, stack4, 1024);
     Console::puts("DONE\n");
 
 #ifdef _USES_SCHEDULER_

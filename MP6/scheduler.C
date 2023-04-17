@@ -74,6 +74,18 @@ Scheduler::Scheduler() {
   Console::puts("Constructed Scheduler.\n");
 }
 
+
+void Scheduler::addToReadyQueue(Thread* thread) {
+  Thread* new_head = head->next;
+  while(new_head->terminated) {
+    new_head = new_head->next;
+  }
+
+  // add old head to the back of the queue
+  // ?????
+
+}
+
 void Scheduler::yield() {
   
   // temp var for old curr thread
@@ -84,6 +96,17 @@ void Scheduler::yield() {
   while(new_head->terminated) {
     new_head = new_head->next;
   }
+
+/*
+  // clean up disk queue properly
+  while(diskHead != nullptr && diskHead->terminated && diskHead != diskTail->next) {
+    diskHead = diskHead->next;
+  }
+  if(diskHead == diskTail->next) {
+    // disk queue is empty
+    diskTail = nullptr;
+    diskHead = nullptr;
+  }*/
 
   // add old head to the back of the queue
   if(!old_thread->terminated) {
@@ -105,6 +128,45 @@ void Scheduler::yield() {
 
 
   Console::puts("Yielded\n");
+
+}
+
+void Scheduler::yieldDisk() {
+  // have thread cut in line with rest of disk queues
+
+  curr_thread->disk = true;
+  Thread* temp_thread = curr_thread;
+
+  // will never be terminated if just yielding in disk
+
+
+  // add to disk queue
+  if(diskHead == nullptr) {
+    diskHead = curr_thread;
+    diskTail = curr_thread;
+    curr_thread->next = nullptr;
+
+
+    // add diskHead to ready queue
+    tail->next = curr_thread;
+    tail = diskTail;
+
+  } else {
+    // insert into ready queue
+    curr_thread->next = diskTail->next;
+    diskTail->next = curr_thread;
+    diskTail = curr_thread;
+  }
+
+
+  yield();
+
+
+
+
+
+
+
 
 }
 

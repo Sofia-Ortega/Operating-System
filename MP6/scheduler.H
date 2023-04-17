@@ -62,6 +62,10 @@ class Scheduler {
    Thread* head;
    Thread* tail; 
 
+   // disk queue head
+   Thread* diskHead; // stores the head 
+   Thread* diskTail;
+
 
    // threads
    Thread* curr_thread;
@@ -74,6 +78,8 @@ class Scheduler {
    static void idle_function() {
       for(;;) curr_scheduler->yield();
    }
+
+   void addToReadyQueue(Thread* thread);
   
 public:
 
@@ -91,6 +97,9 @@ public:
       The scheduler selects the next thread from the ready queue to load onto 
       the CPU, and calls the dispatcher function defined in 'Thread.H' to
       do the context switch. */
+
+   virtual void yieldDisk();
+   // yields and places thread in disk queue
 
    virtual void resume(Thread * _thread);
    /* Add the given thread to the ready queue of the scheduler. This is called
