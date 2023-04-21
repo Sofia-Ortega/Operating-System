@@ -39,7 +39,11 @@
 
 FileSystem::FileSystem() {
     Console::puts("In file system constructor.\n");
-    assert(false);
+
+    disk = nullptr;
+    size = 0;
+    inodes = nullptr;
+    free_blocks = nullptr;
 }
 
 FileSystem::~FileSystem() {
@@ -58,8 +62,16 @@ bool FileSystem::Mount(SimpleDisk * _disk) {
     Console::puts("mounting file system from disk\n");
 
     /* Here you read the inode list and the free list into memory */
-    
-    assert(false);
+    disk = _disk;
+
+    // unsigned char* buf;
+    // disk->read(0, buf);
+
+    // inodes = (Inode*) buf;
+
+    disk->read(1, free_blocks);
+
+    size = disk->size();
 }
 
 bool FileSystem::Format(SimpleDisk * _disk, unsigned int _size) { // static!
@@ -67,7 +79,34 @@ bool FileSystem::Format(SimpleDisk * _disk, unsigned int _size) { // static!
     /* Here you populate the disk with an initialized (probably empty) inode list
        and a free list. Make sure that blocks used for the inodes and for the free list
        are marked as used, otherwise they may get overwritten. */
-    assert(false);
+    
+    // serialize - write inode to sequence of bytes
+    // deserialize - read inode to sequence of bytes
+
+
+    
+    /*
+    unsigned char* buf;
+    unsigned int counter = 0;
+    for(unsigned int i = 0; i < MAX_INODES; i++) {
+        buf[counter] = (unsigned char) (new Inode());
+        counter += sizeof(Inode);
+    }
+
+    _disk->write(0, buf); // INODE block
+    */
+
+
+   // see bitmap implementaiton from prev PA
+    unsigned char* buf2;
+    buf2[0] = '1'; // inode list
+    buf2[1] = '1';
+    for(unsigned int i = 2; i < SimpleDisk::BLOCK_SIZE; i++) {
+        buf2[i] = '0';
+    }
+
+    _disk->write(1, buf2);
+
 }
 
 Inode * FileSystem::LookupFile(int _file_id) {

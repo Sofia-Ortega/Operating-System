@@ -36,19 +36,6 @@
 
 class BlockingDisk : public SimpleDisk {
 
-private:
-
-   // blocked thread queue
-   static BlockingDisk* blockedQueue;
-   static BlockingDisk* tail;
-
-   // members for queue
-   BlockingDisk* next;
-   Thread* thread; // one thread per disk 
-
-   void push_queue();
-   BlockingDisk* pop_queue();
-
 public:
    BlockingDisk(DISK_ID _disk_id, unsigned int _size); 
    /* Creates a BlockingDisk device with the given size connected to the 

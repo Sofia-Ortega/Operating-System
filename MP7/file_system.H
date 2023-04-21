@@ -55,6 +55,20 @@ private:
 
   /* You may need a few additional functions to help read and store the 
      inodes from and to disk. */
+   
+   unsigned long block_no;
+
+   // serialize
+   unsigned char* serialize() {
+      // encode id
+      // encode block no 
+
+   }
+   // deserialize
+   Inode deserialize() {
+      // opposite of serialize
+
+   }
 };
 
 /*--------------------------------------------------------------------------*/
@@ -81,7 +95,7 @@ private:
   static constexpr unsigned int MAX_INODES = SimpleDisk::BLOCK_SIZE / sizeof(Inode);
   /* Just as an example, you can store MAX_INODES in a single INODES block */
 
-  Inode *inodes; // the inode list
+  Inode *inodes; // the inode list, on block 0
   /* The inode list */
 
   unsigned char *free_blocks;

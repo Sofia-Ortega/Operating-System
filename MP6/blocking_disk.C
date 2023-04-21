@@ -28,42 +28,9 @@
 /*--------------------------------------------------------------------------*/
 /* CONSTRUCTOR */
 /*--------------------------------------------------------------------------*/
-BlockingDisk* BlockingDisk::blockedQueue = nullptr;
-BlockingDisk* BlockingDisk::tail = nullptr;
-
-void BlockingDisk::push_queue() {
-  if (blockedQueue == nullptr) {
-    blockedQueue = this;
-  } else {
-    // push to end of queue 
-    tail->next = this; 
-    tail = this;
-  }
-}
-
-BlockingDisk* BlockingDisk::pop_queue() {
-  assert(blockedQueue != nullptr); // make sure SOMETHING in queue
-
-  // is head of blocked queue ready?
-    // yes -> pop from queue and return
-    // no -> return nullptr (fail)
-  
-  BlockingDisk* disk = blockedQueue;
-  if(disk->is_ready()) {
-    // pop from queue
-    blockedQueue = blockedQueue->next;
-    return disk;
-  } 
-
-  return nullptr;
-
-
-  
-}
 
 BlockingDisk::BlockingDisk(DISK_ID _disk_id, unsigned int _size) 
   : SimpleDisk(_disk_id, _size) {
-    next = nullptr;
     
 }
 
@@ -78,7 +45,6 @@ void BlockingDisk::read(unsigned long _block_no, unsigned char * _buf) {
   while (!is_ready()) {
     bool disk = true;
     Console::puts("\nNOT ready\n");
-    // SYSTEM_SCHEDULER->yield();
     SYSTEM_SCHEDULER->yieldDisk();
   }
 
@@ -105,7 +71,6 @@ void BlockingDisk::write(unsigned long _block_no, unsigned char * _buf) {
   while(!is_ready()) {
     Console::puts("\nNOT wridy\n");
     bool disk = true;
-    // SYSTEM_SCHEDULER->yield();
     SYSTEM_SCHEDULER->yieldDisk();
   }
 

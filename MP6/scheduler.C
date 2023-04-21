@@ -90,16 +90,20 @@ void Scheduler::yield() {
     new_head = new_head->next;
   }
 
-/*
-  // clean up disk queue properly
-  while(diskHead != nullptr && diskHead->terminated && diskHead != diskTail->next) {
-    diskHead = diskHead->next;
+  if(old_thread->disk) {
+    old_thread->disk = false; // disk operation successful
+    
+    // remove from disk queue
+    while(diskHead != diskTail->next) {
+      diskHead = diskHead->next;
+    }
+
+    if(diskHead == diskTail->next) {
+      // disk queue is empty
+      diskTail = nullptr;
+      diskHead = nullptr;
+    }
   }
-  if(diskHead == diskTail->next) {
-    // disk queue is empty
-    diskTail = nullptr;
-    diskHead = nullptr;
-  }*/
 
   // add old head to the back of the queue
   if(!old_thread->terminated) {
@@ -128,10 +132,6 @@ void Scheduler::yield() {
 
 void Scheduler::yieldDisk() {
   // have thread cut in line with rest of disk queues
-  Console::puts("before disk yield");
-  printQueue();
-  printDiskQueue();
-
   curr_thread->disk = true;
 
   // get next head
@@ -142,7 +142,6 @@ void Scheduler::yieldDisk() {
 
   // add to disk queue
   if(diskHead == nullptr) {
-    Console::puts("adding disk head as "); Console::putui(curr_thread->ThreadId()); Console::puts("\n");
     diskHead = curr_thread;
     diskTail = curr_thread;
     curr_thread->next = nullptr;
@@ -158,13 +157,10 @@ void Scheduler::yieldDisk() {
     diskTail->next = curr_thread;
 
     if(diskTail == tail) tail = curr_thread;
-    
+
     diskTail = curr_thread;
 
-
   }
-
-
 
   Console::puts("yielded in disk queue \n");
   printQueue();
@@ -179,7 +175,7 @@ void Scheduler::yieldDisk() {
 
 void Scheduler::printQueue() {
   Thread* curr = head;
-  Console::puts("\n\nQueue: ");
+  Console::puts("\n-----------------\nQueue: ");
   while(curr != nullptr) {
     Console::puts("[ Thread "); Console::putui(curr->ThreadId()); Console::puts("] ->");
     curr = curr->next;
@@ -189,20 +185,18 @@ void Scheduler::printQueue() {
 
 void Scheduler::printDiskQueue() {
   Thread* curr = diskHead;
-  Console::puts("\n\nDISK Queue: ");
+  Console::puts("\nDISK Queue: ");
   while(curr != diskTail->next) {
     Console::puts("[ Thread "); Console::putui(curr->ThreadId()); Console::puts("] ->");
     curr = curr->next;
   }
-  Console::puts("\n");
+  Console::puts("\n-----------------------\n");
 
 }
 
 
 void Scheduler::resume(Thread * _thread) {
-  tail->next = _thread;
-  tail = tail->next;
-  tail->next = nullptr;
+  // handled in yield
   
 }
 
