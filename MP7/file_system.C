@@ -107,6 +107,26 @@ bool FileSystem::Format(SimpleDisk * _disk, unsigned int _size) { // static!
 
     _disk->write(1, buf2);
 
+    /*
+    Inode inod;
+    Console::puts("[TEST] run serialization test: \n");
+    for(long i = 0; i < 10; i++) {
+        unsigned long j = i + 1;
+        long* arr = inod.deserialize( inod.serialize(i, j) );
+        Console::puts("["); Console::puti((int) i); Console::puts("] ");
+        Console::puti((int) arr[0]); Console::puts(", "); Console::puti((int)arr[1]);
+        Console::puts("\n");
+
+        assert(i == arr[0]);
+        assert(j == arr[1]);
+
+    }
+
+    Console::puts("[SUCCESS] serialization test passed \n");
+
+    */
+
+
 }
 
 Inode * FileSystem::LookupFile(int _file_id) {

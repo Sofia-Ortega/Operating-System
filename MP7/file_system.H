@@ -58,15 +58,28 @@ private:
    
    unsigned long block_no;
 
+public:
    // serialize
-   unsigned char* serialize() {
+   unsigned char* serialize(long id, unsigned long block_no) {
       // encode id
+      // long id takes up at most 8 char
+
       // encode block no 
+
+      Console::puts(""); // need this for some reason....
+
+      long arr[2] = {id, block_no};
+
+
+      unsigned char* c = (unsigned char*) arr;
+      return c;
 
    }
    // deserialize
-   Inode deserialize() {
+   long* deserialize(unsigned char* data) {
       // opposite of serialize
+      long* arr = (long*) data;
+      return arr;
 
    }
 };
