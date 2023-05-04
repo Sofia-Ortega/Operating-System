@@ -44,7 +44,7 @@ class Inode
 
 private:
   long id; // File "name"
-  Inode* next;
+  unsigned long block_no;
 
   /* You will need additional information in the inode, such as allocation 
      information. */
@@ -59,8 +59,8 @@ private:
   /* You may need a few additional functions to help read and store the 
      inodes from and to disk. */
    
-   unsigned long block_no;
-
+public:
+   Inode() : id(-1), block_no(99), fileLength(0), free(false), fs(nullptr) {}
 };
 
 /*--------------------------------------------------------------------------*/
@@ -80,14 +80,12 @@ class FileSystem
 
 private:
   /* -- DEFINE YOUR FILE SYSTEM DATA STRUCTURES HERE. */
-
   unsigned int size;
 
   static constexpr unsigned int MAX_INODES = SimpleDisk::BLOCK_SIZE / sizeof(Inode);
   /* Just as an example, you can store MAX_INODES in a single INODES block */
 
-//   Inode inodes[MAX_INODES]; // the inode list, on block 0
-  Inode* inodes;
+  Inode inodes[MAX_INODES]; // the inode list, on block 0
   int numOfInodes;
   /* The inode list */
 
@@ -98,53 +96,61 @@ private:
      If you reserve one block to store the "free list", you can handle a file system up to 
      256kB. (Large enough as a proof of concept.) */
      
-  // short GetFreeInode();
+  int GetFreeInode();
   int GetFreeBlock();
   /* It may be helpful to two functions to hand out free inodes in the inode list and free
      blocks. These functions also come useful to class Inode and File. */
    
    unsigned char* serializeInodes() {
-      Inode* curr = inodes;
-
+      Console::puts("Beginning to Serialize inodes: \n");
       long* list;
       int counter = 0;
 
-      while(curr->next != nullptr) {
-         long temp_id = curr->id;
-         long temp_no = curr->block_no;
-         long temp_length = curr->fileLength;
+      list[counter++] = numOfInodes;
+
+      for(int i = 0; i < MAX_INODES; i++) { 
+         Inode* in = &inodes[i];
+         if(in->free) continue;
+         
+         long temp_id = in->id;
+         long temp_no = in->block_no;
+         long temp_length = in->fileLength;
 
          list[counter++] = temp_id;
          list[counter++] = temp_no;
          list[counter++] = temp_length;
-
-         curr = curr->next;
       }
    
-      list[counter++] = -1; // end marker
 
       return (unsigned char*) list;
    }
 
    void deserializeInodes(unsigned char* data) {
+      Console::puts("Beginning to Deserialize inodes: \n");
+      if(data == nullptr) return;
 
       long* list = (long*) data;
+      
 
       int counter = 0;
-      while(list[counter] != -1) {
+
+      numOfInodes = list[counter++];
+
+      for(int i = 0; i < numOfInodes; i++) {
          long temp_id = list[counter++];
          long temp_no = list[counter++];
          long temp_length = list[counter++];
 
-         Inode inode;
-         inode.id = temp_id;
-         inode.block_no = temp_no;
-         inode.fileLength = temp_length;
-         inode.fs = this;
+         Inode* in = &inodes[i];
+         in->id = temp_id;
+         in->block_no = temp_no;
+         in->fileLength = temp_length;
+         in->fs = this;
+         in->free = false;
 
-         inode.next = inodes;
-         inodes = &inode;
       }
+
+      Console::puts("Deserialized "); Console::puti((int) numOfInodes); Console::puts(" inodes \n");
 
 
    }

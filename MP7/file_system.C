@@ -42,14 +42,19 @@ FileSystem::FileSystem() {
 
     disk = nullptr;
     size = 0;
-    inodes = nullptr;
+    numOfInodes = 0;
     free_blocks = nullptr;
+
 }
 
 FileSystem::~FileSystem() {
     Console::puts("unmounting file system\n");
     /* Make sure that the inode list and the free list are saved. */
-    assert(false);
+
+    disk->write(0, serializeInodes()); // inodes list saved
+    disk->write(1, free_blocks); // free blocks saved
+
+
 }
 
 
@@ -67,17 +72,32 @@ bool FileSystem::Mount(SimpleDisk * _disk) {
     unsigned char* buf;
     disk->read(0, buf);
 
+    deserializeInodes(buf);
 
-    // FIXME
-
-
-
-    disk->read(1, free_blocks);
-    // FIXME
+    unsigned char buf2[SimpleDisk::BLOCK_SIZE];
+    Console::puts("");
+    disk->read(1, buf2);
+    free_blocks = buf2;
 
     size = disk->size();
 
+    Console::puts("[TEST] Mounting file - inodes: \n");
+    for(int i = 0; i < MAX_INODES; i++) {
+        assert(!inodes[i].free);
+    }
+    Console::puts("[PASSED]\n");
 
+
+    /*
+    Console::puts("[TEST] Mounting file - free_blocks: \n");
+    for(int i = 2; i < SimpleDisk::BLOCK_SIZE; i++) {
+        assert(free_blocks[i] == '0');
+    }
+    Console::puts("[PASSED]\n");
+
+    */
+
+    return true;
 }
 
 bool FileSystem::Format(SimpleDisk * _disk, unsigned int _size) { // static!
@@ -90,71 +110,55 @@ bool FileSystem::Format(SimpleDisk * _disk, unsigned int _size) { // static!
     // deserialize - read inode to sequence of bytes
 
 
-
-    
-    /*
-    unsigned char* buf;
-    unsigned int counter = 0;
-    for(unsigned int i = 0; i < MAX_INODES; i++) {
-        buf[counter] = (unsigned char) (new Inode());
-        counter += sizeof(Inode);
-    }
-
-    _disk->write(0, buf); // INODE block
-    */
-
    unsigned char* buf;
-   long end = -1;
-   buf[0] = (unsigned char) end;
+   long end[1] = {0};
+   buf = (unsigned char*) end;
    _disk->write(0, buf);
 
+
    // see bitmap implementaiton from prev PA
-    unsigned char* buf2;
+    unsigned char buf2[SimpleDisk::BLOCK_SIZE];
     buf2[0] = '1'; // inode list
-    buf2[1] = '1';
+    buf2[1] = '1'; // free list
     for(unsigned int i = 2; i < SimpleDisk::BLOCK_SIZE; i++) {
         buf2[i] = '0';
     }
 
     _disk->write(1, buf2);
 
-    return true;
+    // ****** TESTING format of inode list***********
+    
+    Console::puts("[TEST] Format of block 0 - inode block \n");
+    _disk->read(0, buf);
+    long* l = (long*) buf;
+    Console::puti((int) l[0]);
+    assert(l[0] == 0);
+    Console::puts("[PASSED]\n");
 
-
-    /***************** TEST SERIALIZATION **************
-    Inode inod;
-    Console::puts("[TEST] run serialization test: \n");
-    for(long i = 0; i < 10; i++) {
-        unsigned long j = i + 1;
-        long* arr = inod.deserialize( inod.serialize(i, j) );
-        Console::puts("["); Console::puti((int) i); Console::puts("] ");
-        Console::puti((int) arr[0]); Console::puts(", "); Console::puti((int)arr[1]);
-        Console::puts("\n");
-
-        assert(i == arr[0]);
-        assert(j == arr[1]);
-
+    // ****************** TESTING format of free block list *********
+    
+    Console::puts("[TEST] Format of block 1 - free block \n");
+    _disk->read(1, buf2);
+    assert(buf2[0] == '1' && buf2[1] == '1');
+    for(unsigned int i = 2; i < SimpleDisk::BLOCK_SIZE; i++) {
+        Console::putch(buf2[i]);
+        Console::puts(", ");
+        assert(buf2[i] == '0');
     }
+    Console::puts("\n");
+    Console::puts("[PASSED]\n");
+    
 
-    Console::puts("[SUCCESS] serialization test passed \n");
-
-    ****************************************************/
-
+    return true;
 
 }
 
 Inode * FileSystem::LookupFile(int _file_id) {
     Console::puts("looking up file with id = "); Console::puti(_file_id); Console::puts("\n");
     /* Here you go through the inode list to find the file. */
-    // for(int i = 0; i < MAX_INODES; i++) {
-    //     Inode in = inodes[i];
-    //     if(!in.free && in.id == _file_id) return &inodes[i];
-        
-    // }
-    Inode* curr = inodes;
-    while(curr != nullptr) {
-        if(curr->id == _file_id) return curr;
-        curr = curr->next;
+    for(int i = 0; i < MAX_INODES; i++) {
+        Inode in = inodes[i];
+        if(!in.free && in.id == _file_id) return &inodes[i];
     }
 
     return nullptr;
@@ -166,18 +170,28 @@ bool FileSystem::CreateFile(int _file_id) {
        Then get yourself a free inode and initialize all the data needed for the
        new file. After this function there will be a new file on disk. */
     
-    assert(LookupFile(_file_id) == nullptr);
+    if(LookupFile(_file_id) != nullptr) {
+        Console::puts("File id already exists - aborting\n");
+        return false;
+    }
 
-    int block = GetFreeBlock();
-    Inode new_inod;
-    new_inod.id = _file_id;
-    new_inod.fs = this;
-    new_inod.block_no = block;
+    // get free block + inode
+    int free_block = GetFreeBlock();
+    int free_inode = GetFreeInode();
 
-    // add to linked list
-    new_inod.next = inodes;
-    inodes = &new_inod;
+    // initialize inode at free_inode
+    inodes[free_inode].id = _file_id;
+    inodes[free_inode].block_no = free_block;
+    inodes[free_inode].fileLength = 0;
+    inodes[free_inode].free = false;
+    inodes[free_inode].fs = nullptr;
 
+    numOfInodes++;
+
+    // set block as taken 
+    free_blocks[free_block] = '1';
+
+    return true;
 }
 
 bool FileSystem::DeleteFile(int _file_id) {
@@ -193,27 +207,34 @@ bool FileSystem::DeleteFile(int _file_id) {
 
     }
 
+    // free up block no
     int blockNum = in->block_no;
     free_blocks[blockNum] = '0';
 
+    // free up inode
+    in->free = true;
+    numOfInodes--;
 
-    Inode* curr = inodes;
+    return true;
 
-    while(curr != nullptr) {
-        if(curr->next->id == _file_id) {
-            curr->next = curr->next->next;
-            return true;
-        };
-        curr = curr->next;
+}
+
+int FileSystem::GetFreeInode() {
+    for(int i = 0; i < MAX_INODES; i++) {
+        if(inodes[i].free) return i;
     }
 
-    Console::puts("[ERROR 2] DeleteFile() - no inode found with id: "); Console::puti(_file_id); Console::puts("\n");
-    return false;
-
+    Console::puts("[ERROR] no free inode found\n");
+    assert(false);
+    return -1;
 }
 
 int FileSystem::GetFreeBlock() {
     for(int i = 0; i < SimpleDisk::BLOCK_SIZE; i++) {
         if(free_blocks[i] == '0') return i;
     }
+
+    Console::puts("[ERROR] no free block found\n");
+    assert(false);
+    return -1;
 }
