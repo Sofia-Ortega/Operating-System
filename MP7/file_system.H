@@ -60,7 +60,7 @@ private:
      inodes from and to disk. */
    
 public:
-   Inode() : id(-1), block_no(99), fileLength(0), free(false), fs(nullptr) {}
+   Inode() : id(-1), block_no(99), fileLength(0), free(true), fs(nullptr) {}
 };
 
 /*--------------------------------------------------------------------------*/

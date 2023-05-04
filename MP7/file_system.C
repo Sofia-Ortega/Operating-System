@@ -83,7 +83,7 @@ bool FileSystem::Mount(SimpleDisk * _disk) {
 
     Console::puts("[TEST] Mounting file - inodes: \n");
     for(int i = 0; i < MAX_INODES; i++) {
-        assert(!inodes[i].free);
+        assert(inodes[i].free);
     }
     Console::puts("[PASSED]\n");
 

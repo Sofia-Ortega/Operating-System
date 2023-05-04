@@ -136,6 +136,7 @@ void exercise_file_system(FileSystem * _file_system) {
         char result1[30];
         assert(file1.Read(20, result1) == 20);
         for(int i = 0; i < 20; i++) {
+            Console::putch(result1[i]);Console::puts("\n");
              assert(result1[i] == STRING1[i]);
         }
     
