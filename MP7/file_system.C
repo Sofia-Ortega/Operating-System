@@ -87,6 +87,7 @@ bool FileSystem::Mount(SimpleDisk * _disk) {
     }
     Console::puts("[PASSED]\n");
 
+    return true;
 
     /*
     Console::puts("[TEST] Mounting file - free_blocks: \n");
@@ -97,7 +98,6 @@ bool FileSystem::Mount(SimpleDisk * _disk) {
 
     */
 
-    return true;
 }
 
 bool FileSystem::Format(SimpleDisk * _disk, unsigned int _size) { // static!
@@ -106,10 +106,6 @@ bool FileSystem::Format(SimpleDisk * _disk, unsigned int _size) { // static!
        and a free list. Make sure that blocks used for the inodes and for the free list
        are marked as used, otherwise they may get overwritten. */
     
-    // serialize - write inode to sequence of bytes
-    // deserialize - read inode to sequence of bytes
-
-
    unsigned char* buf;
    long end[1] = {0};
    buf = (unsigned char*) end;

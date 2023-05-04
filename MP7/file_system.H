@@ -44,7 +44,7 @@ class Inode
 
 private:
   long id; // File "name"
-  unsigned long block_no;
+  unsigned long block_no; // number of block number mapped to
 
   /* You will need additional information in the inode, such as allocation 
      information. */

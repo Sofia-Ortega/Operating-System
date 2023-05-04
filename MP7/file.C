@@ -78,8 +78,6 @@ int File::Read(unsigned int _n, char *_buf) {
 
     Console::puts("\n");
 
-    // currPos += counter;
-
     return counter;
 
 }

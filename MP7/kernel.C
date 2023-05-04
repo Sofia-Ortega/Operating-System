@@ -118,10 +118,12 @@ void exercise_file_system(FileSystem * _file_system) {
     
         /* -- Write into File 1 -- */
         file1.Write(20, STRING1);
+        Console::puts("\n");
     
         /* -- Write into File 2 -- */
     
         file2.Write(20, STRING2);
+        Console::puts("\n");
     
         /* -- Files will get automatically closed when we leave scope  -- */
     }
@@ -136,9 +138,9 @@ void exercise_file_system(FileSystem * _file_system) {
         char result1[30];
         assert(file1.Read(20, result1) == 20);
         for(int i = 0; i < 20; i++) {
-            Console::putch(result1[i]);Console::puts("\n");
              assert(result1[i] == STRING1[i]);
         }
+        Console::puts("\n");
     
         /* -- Read from File 2 and check result -- */
         file2.Reset();
@@ -147,6 +149,7 @@ void exercise_file_system(FileSystem * _file_system) {
         for(int i = 0; i < 20; i++) {
             assert(result2[i] == STRING2[i]);
         }
+        Console::puts("\n");
     
         /* -- "Close" files again -- */
     }
