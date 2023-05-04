@@ -44,6 +44,11 @@ class File  {
     
 private:
     /* -- your file data structures here ... */
+    int currPos;
+    unsigned long block_no;
+    unsigned int fileLength;
+    SimpleDisk* disk;
+    Inode* myInode;
     
     /* You will need a reference to the inode, maybe even a reference to the 
        file system. 

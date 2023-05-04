@@ -44,9 +44,12 @@ class Inode
 
 private:
   long id; // File "name"
+  Inode* next;
 
   /* You will need additional information in the inode, such as allocation 
      information. */
+  unsigned int fileLength;
+  bool free;
 
   FileSystem *fs; // It may be handy to have a pointer to the File system.
                   // For example when you need a new block or when you want
@@ -58,30 +61,6 @@ private:
    
    unsigned long block_no;
 
-public:
-   // serialize
-   unsigned char* serialize(long id, unsigned long block_no) {
-      // encode id
-      // long id takes up at most 8 char
-
-      // encode block no 
-
-      Console::puts(""); // need this for some reason....
-
-      long arr[2] = {id, block_no};
-
-
-      unsigned char* c = (unsigned char*) arr;
-      return c;
-
-   }
-   // deserialize
-   long* deserialize(unsigned char* data) {
-      // opposite of serialize
-      long* arr = (long*) data;
-      return arr;
-
-   }
 };
 
 /*--------------------------------------------------------------------------*/
@@ -102,13 +81,14 @@ class FileSystem
 private:
   /* -- DEFINE YOUR FILE SYSTEM DATA STRUCTURES HERE. */
 
-  SimpleDisk *disk;
   unsigned int size;
 
   static constexpr unsigned int MAX_INODES = SimpleDisk::BLOCK_SIZE / sizeof(Inode);
   /* Just as an example, you can store MAX_INODES in a single INODES block */
 
-  Inode *inodes; // the inode list, on block 0
+//   Inode inodes[MAX_INODES]; // the inode list, on block 0
+  Inode* inodes;
+  int numOfInodes;
   /* The inode list */
 
   unsigned char *free_blocks;
@@ -119,11 +99,59 @@ private:
      256kB. (Large enough as a proof of concept.) */
      
   // short GetFreeInode();
-  // int GetFreeBlock();
+  int GetFreeBlock();
   /* It may be helpful to two functions to hand out free inodes in the inode list and free
      blocks. These functions also come useful to class Inode and File. */
+   
+   unsigned char* serializeInodes() {
+      Inode* curr = inodes;
+
+      long* list;
+      int counter = 0;
+
+      while(curr->next != nullptr) {
+         long temp_id = curr->id;
+         long temp_no = curr->block_no;
+         long temp_length = curr->fileLength;
+
+         list[counter++] = temp_id;
+         list[counter++] = temp_no;
+         list[counter++] = temp_length;
+
+         curr = curr->next;
+      }
+   
+      list[counter++] = -1; // end marker
+
+      return (unsigned char*) list;
+   }
+
+   void deserializeInodes(unsigned char* data) {
+
+      long* list = (long*) data;
+
+      int counter = 0;
+      while(list[counter] != -1) {
+         long temp_id = list[counter++];
+         long temp_no = list[counter++];
+         long temp_length = list[counter++];
+
+         Inode inode;
+         inode.id = temp_id;
+         inode.block_no = temp_no;
+         inode.fileLength = temp_length;
+         inode.fs = this;
+
+         inode.next = inodes;
+         inodes = &inode;
+      }
+
+
+   }
 
 public:
+  SimpleDisk *disk;
+
   FileSystem();
   /* Just initializes local data structures. Does not connect to disk yet. */
 
