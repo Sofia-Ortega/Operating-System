@@ -1,5 +1,5 @@
 # Operating System
-This repository builds an Operating System. Final product can be found in (MP7)[./MP7]. 
+This repository builds an Operating System. Final product can be found in [MP7](./MP7). 
 All prior folders show the OS being built incrementally
 
 ## File Structure
